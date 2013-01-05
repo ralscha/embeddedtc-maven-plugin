@@ -1,0 +1,154 @@
+package ch.rasc.embeddedtc.runner;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.catalina.deploy.ApplicationParameter;
+import org.apache.catalina.deploy.ContextEnvironment;
+import org.apache.catalina.deploy.ContextResource;
+import org.apache.tomcat.util.IntrospectionUtils;
+
+public class Context {
+	private String war;
+
+	private String contextPath;
+
+	private String contextFile;
+
+	private boolean sessionPersistence = false;
+
+	private List<Map<String, Object>> resources = Collections.emptyList();
+
+	private List<ContextEnvironment> environments = Collections.emptyList();
+
+	private List<ApplicationParameter> parameters = Collections.emptyList();
+
+	private Map<String, Object> resource;
+
+	private ContextEnvironment environment;
+
+	private ApplicationParameter parameter;
+
+	public String getWar() {
+		return war;
+	}
+
+	public void setWar(String war) {
+		this.war = war;
+	}
+
+	public String getContextPath() {
+		return contextPath;
+	}
+
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	public void setResources(List<Map<String, Object>> resources) {
+		this.resources = resources;
+	}
+
+	public List<ContextEnvironment> getEnvironments() {
+
+		if (environment != null) {
+			if (environments.isEmpty()) {
+				return Collections.singletonList(environment);
+			}
+
+			List<ContextEnvironment> combinedEnvironments = new ArrayList<>(environments);
+			combinedEnvironments.add(environment);
+			return combinedEnvironments;
+		}
+
+		return environments;
+	}
+
+	public void setEnvironments(List<ContextEnvironment> environments) {
+		this.environments = environments;
+	}
+
+	public boolean isSessionPersistence() {
+		return sessionPersistence;
+	}
+
+	public void setSessionPersistence(boolean sessionPersistence) {
+		this.sessionPersistence = sessionPersistence;
+	}
+
+	public String getContextFile() {
+		return contextFile;
+	}
+
+	public void setContextFile(String contextFile) {
+		this.contextFile = contextFile;
+	}
+
+	public List<ApplicationParameter> getParameters() {
+		if (parameter != null) {
+			if (parameters.isEmpty()) {
+				return Collections.singletonList(parameter);
+			}
+
+			List<ApplicationParameter> combinedParameters = new ArrayList<>(parameters);
+			combinedParameters.add(parameter);
+			return combinedParameters;
+		}
+
+		return parameters;
+	}
+
+	public void setParameters(List<ApplicationParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	public void setResource(Map<String, Object> resource) {
+		this.resource = resource;
+	}
+
+	public void setEnvironment(ContextEnvironment environment) {
+		this.environment = environment;
+	}
+
+	public void setParameter(ApplicationParameter parameter) {
+		this.parameter = parameter;
+	}
+
+	public boolean hasEnvironmentsOrResources() {
+		return !environments.isEmpty() || !resources.isEmpty() || environment != null || resource != null;
+	}
+
+	public List<ContextResource> createContextResourceObjects() {
+		List<ContextResource> crObjects = new ArrayList<>();
+
+		if (resource != null) {
+			if (resources.isEmpty()) {
+				setResources(Collections.singletonList(resource));
+			} else {
+				resources.add(resource);
+			}
+		}
+
+		for (Map<String, Object> res : resources) {
+			ContextResource contextResource = new ContextResource();
+
+			for (Map.Entry<String, Object> entry : res.entrySet()) {
+				IntrospectionUtils.setProperty(contextResource, entry.getKey(), entry.getValue().toString());
+			}
+
+			crObjects.add(contextResource);
+		}
+
+		return crObjects;
+	}
+
+	@Override
+	public String toString() {
+		return "Context [war=" + war + ", contextPath=" + contextPath + ", contextFile=" + contextFile
+				+ ", sessionPersistence=" + sessionPersistence + ", resources=" + resources + ", environments="
+				+ environments + ", parameters=" + parameters + "]";
+	}
+
+}

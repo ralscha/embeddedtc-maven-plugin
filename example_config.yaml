@@ -1,0 +1,161 @@
+# Directory in which the runner extracts the war and creates the temp and log directories for Tomcat. 
+# The runner creates this directory if it does not exists. 
+# If this option denotes a relative path it will be resolved to the directory where the jar is located. 
+# Default value is tc. This creates a tc sub directory in the directory where the jar is located. 
+extractDirectory: tc
+
+# Has to be specifed if load-balancing is needed. Empty by default.
+jvmRoute: server1
+
+# true sets the log level to WARN for the loggers that log information on Tomcat start up. 
+# This prevents the usual startup information being logged. f
+# false sets the log level to the default level of INFO.
+# Default false
+silent: true
+
+# Specifies system properties. The runner sets these propertis at the beginning of the program.
+systemProperties: 
+  one: 1
+  two: secondProperty
+
+
+# If not specified then these listeners will be added by default.
+# GlobalResourcesLifecycleListener only if jndi is enabled
+# If specified then only the listed listeners will be added
+listeners: 
+  - org.apache.catalina.core.AprLifecycleListener
+  - org.apache.catalina.core.JasperListener
+  - org.apache.catalina.core.JreMemoryLeakPreventionListener
+  - org.apache.catalina.mbeans.GlobalResourcesLifecycleListener
+  - org.apache.catalina.core.ThreadLocalLeakPreventionListener
+
+# List of connectors.
+# If no connector is specfied the Runner creates a default connector with protocol HTTP/1.1 and port 8080.
+# If only port is specified protocol is set to HTTP/1.1 
+connectors:
+  # HTTP Connector
+  - port: 8080
+    protocol: HTTP/1.1
+    # These values are valid.
+    # HTTP/1.1 - Auto switching. If APR library is available then APR connector, if not then blocking Java connector
+    # org.apache.coyote.http11.Http11Protocol - blocking Java connector
+    # org.apache.coyote.http11.Http11NioProtocol - non blocking Java connector
+    # org.apache.coyote.http11.Http11AprProtocol - the APR/native connector.
+    connectionTimeout: 20000
+    URIEncoding: UTF-8
+ 
+  # AJP Connector
+  - port: 8009
+    protocol: AJP/1.3
+    # These values are valid
+    # AJP/1.3 - Auto switching. If APR library is available then APR connector, if not then blocking Java connector
+    # org.apache.coyote.ajp.AjpProtocol - blocking Java connector
+    # org.apache.coyote.ajp.AjpNioProtocol - non blocking Java connector.
+    # org.apache.coyote.ajp.AjpAprProtocol - the APR/native connector.
+    URIEncoding: UTF-8
+    tomcatAuthentication: false
+    
+# As an option if only one connector is needed 
+# If only port is specified protocol is set to HTTP/1.1 
+connector: 
+  port: 80
+
+# Specifies one web application. If no context or contexts section is specified then the Runner 
+# will deploy the first war file he findes to the ROOT context.       
+context: 
+  # Regular expression that specifies the war file. .* is the default value and the Runner chooses the first war he finds
+  war: .*
+  TODO: embeddedWar
+  TODO: externalWar
+    
+  # Specifies an external context xml file. If this parameter points to a valid context xml file then 
+  # searching for the /META-INF/context.xml file in the war is skipped. 
+  contextFile:
+    
+  # If specified like this or parameter is omitted then application is deployed in the ROOT context ("")
+  contextPath:  
+    
+  # Deploy webapp at the specified path
+  #contextPath: /test
+    
+  # If session should be persisted when tomcat shuts down. 
+  # Default false
+  sessionPersistence: false   
+    
+  # Resource Definitions
+  resources:
+    - name: jdbc/db
+      auth: Container
+      factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
+      type: javax.sql.DataSource
+      username: sa
+      password: sa
+      driverClassName: net.sourceforge.jtds.jdbc.Driver
+      url: jdbc:jtds:sqlserver://localhost/db
+      initialSize: 2
+      minIdle: 2
+      maxIdle: 4
+      maxActive: 10
+      maxWait: 10000
+      defaultAutoCommit: false
+      
+  # Optional if there is only one resource definition
+  resource:
+    name: jdbc/db
+    auth: Container
+    factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
+    type: javax.sql.DataSource
+    username: sa
+    password: sa
+    driverClassName: net.sourceforge.jtds.jdbc.Driver
+    url: jdbc:jtds:sqlserver://localhost/db
+    initialSize: 2
+    minIdle: 2
+    maxIdle: 4
+    maxActive: 10
+    maxWait: 10000
+    defaultAutoCommit: false         
+    
+  # Context Parameters
+  parameters:
+    - name: aParameter
+      value: theValue
+      
+  # Optional if there is only one parameter      
+  parameter:
+    name: aParameter
+    value: theValue
+      
+    
+  # Environment Entries            
+  environments:
+    - name: spring.profiles.active 
+      value: development
+      type: java.lang.String
+    - name: indexBase
+      value: /var/ix
+      type: java.lang.String
+    - name: next.version.major
+      value: 5
+      type: java.lang.Integer
+    - name: next.version.minor
+      value: 2
+      type: java.lang.Integer  
+      
+  # Optional if there is only one environment variable
+  environment:
+    name: spring.profiles.active 
+    value: development
+    type: java.lang.String
+      
+              
+    
+# Use contexts section if there are more than one web applications. If no context or contexts section is specified then the Runner 
+# will deploy the first war file he findes to the ROOT context.  
+# Same configuration parameters as in the context section
+contexts:        
+  - war: .*
+    contextPath: /one
+  
+  - war: 
+    contextPath: /two       
