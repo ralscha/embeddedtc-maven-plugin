@@ -19,10 +19,7 @@ public class Config {
 
 	private boolean silent = false;
 
-	private Set<String> listeners = new HashSet<>(Arrays.asList("org.apache.catalina.core.AprLifecycleListener",
-			"org.apache.catalina.core.JasperListener", "org.apache.catalina.core.JreMemoryLeakPreventionListener",
-			"org.apache.catalina.mbeans.GlobalResourcesLifecycleListener",
-			"org.apache.catalina.core.ThreadLocalLeakPreventionListener"));
+	private Set<String> listeners = new HashSet<>(Arrays.asList("org.apache.catalina.core.AprLifecycleListener"));
 
 	private Map<String, Object> systemProperties = Collections.emptyMap();
 

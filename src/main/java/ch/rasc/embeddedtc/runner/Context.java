@@ -11,7 +11,9 @@ import org.apache.catalina.deploy.ContextResource;
 import org.apache.tomcat.util.IntrospectionUtils;
 
 public class Context {
-	private String war;
+	private String embeddedWar;
+
+	private String externalWar;
 
 	private String contextPath;
 
@@ -31,12 +33,20 @@ public class Context {
 
 	private ApplicationParameter parameter;
 
-	public String getWar() {
-		return war;
+	public String getEmbeddedWar() {
+		return embeddedWar;
 	}
 
-	public void setWar(String war) {
-		this.war = war;
+	public void setEmbeddedWar(String embeddedWar) {
+		this.embeddedWar = embeddedWar;
+	}
+
+	public String getExternalWar() {
+		return externalWar;
+	}
+
+	public void setExternalWar(String externalWar) {
+		this.externalWar = externalWar;
 	}
 
 	public String getContextPath() {
@@ -146,9 +156,10 @@ public class Context {
 
 	@Override
 	public String toString() {
-		return "Context [war=" + war + ", contextPath=" + contextPath + ", contextFile=" + contextFile
-				+ ", sessionPersistence=" + sessionPersistence + ", resources=" + resources + ", environments="
-				+ environments + ", parameters=" + parameters + "]";
+		return "Context [embeddedWar=" + embeddedWar + ", externalWar=" + externalWar + ", contextPath=" + contextPath
+				+ ", contextFile=" + contextFile + ", sessionPersistence=" + sessionPersistence + ", resources="
+				+ resources + ", environments=" + environments + ", parameters=" + parameters + ", resource="
+				+ resource + ", environment=" + environment + ", parameter=" + parameter + "]";
 	}
 
 }

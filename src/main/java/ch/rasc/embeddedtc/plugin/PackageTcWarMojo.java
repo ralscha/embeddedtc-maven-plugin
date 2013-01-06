@@ -65,6 +65,15 @@ public class PackageTcWarMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project.artifactId}-${project.version}-embeddedtc.jar", required = true)
 	private String finalName;
 
+	@Parameter(required = false)
+	private String includeTcNativeWin32;
+
+	@Parameter(required = false)
+	private String includeTcNativeWin64;
+
+	@Parameter(defaultValue = "true", required = true)
+	private boolean includeJSPSupport;
+
 	@Parameter
 	private List<Dependency> extraDependencies;
 
@@ -89,15 +98,21 @@ public class PackageTcWarMojo extends AbstractMojo {
 					aos.closeArchiveEntry();
 				}
 
-				Set<String> includeGroupIds = new HashSet<>();
-				includeGroupIds.add("org.apache.tomcat");
-				includeGroupIds.add("org.apache.tomcat.embed");
-				includeGroupIds.add("ecj");
-				includeGroupIds.add("org.yaml");
-				includeGroupIds.add("com.beust");
+				Set<String> includeArtifacts = new HashSet<>();
+				includeArtifacts.add("org.apache.tomcat:tomcat-jdbc");
+				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-core");
+				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-logging-juli");
+				includeArtifacts.add("org.yaml:snakeyaml");
+				includeArtifacts.add("com.beust:jcommander");
+
+				if (includeJSPSupport) {
+					includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-jasper");
+					includeArtifacts.add("ecj:ecj");
+				}
 
 				for (Artifact pluginArtifact : pluginArtifacts) {
-					if (includeGroupIds.contains(pluginArtifact.getGroupId())) {
+					String artifactName = pluginArtifact.getGroupId() + ":" + pluginArtifact.getArtifactId();
+					if (includeArtifacts.contains(artifactName)) {
 						try (JarFile jarFile = new JarFile(pluginArtifact.getFile())) {
 							extractJarToArchive(jarFile, aos);
 						}
@@ -127,8 +142,25 @@ public class PackageTcWarMojo extends AbstractMojo {
 					}
 				}
 
-				addFile(aos, "/conf/web.xml", "conf/web.xml");
+				if (includeJSPSupport) {
+					addFile(aos, "/conf/web.xml", "conf/web.xml");
+				} else {
+					addFile(aos, "/conf/web_wo_jsp.xml", "conf/web.xml");
+				}
 				addFile(aos, "/conf/logging.properties", "conf/logging.properties");
+
+				if (includeTcNativeWin32 != null) {
+					aos.putArchiveEntry(new JarArchiveEntry("tcnative-1.dll.32"));
+					Files.copy(Paths.get(includeTcNativeWin32), aos);
+					aos.closeArchiveEntry();
+				}
+
+				if (includeTcNativeWin64 != null) {
+					aos.putArchiveEntry(new JarArchiveEntry("tcnative-1.dll.64"));
+					Files.copy(Paths.get(includeTcNativeWin64), aos);
+					aos.closeArchiveEntry();
+
+				}
 
 				String[] runnerClasses = { "ch.rasc.embeddedtc.runner.CheckConfig$CheckConfigOptions",
 						"ch.rasc.embeddedtc.runner.CheckConfig", "ch.rasc.embeddedtc.runner.Config",
@@ -158,7 +190,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 				manifest.write(aos);
 				aos.closeArchiveEntry();
 
-				aos.putArchiveEntry(new JarArchiveEntry("EXECWAR_TIMESTAMP"));
+				aos.putArchiveEntry(new JarArchiveEntry(Runner.TIMESTAMP_FILENAME));
 				aos.write(String.valueOf(System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8));
 				aos.closeArchiveEntry();
 

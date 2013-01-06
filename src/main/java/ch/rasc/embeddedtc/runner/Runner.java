@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -29,16 +32,12 @@ import javax.servlet.ServletException;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.AprLifecycleListener;
-import org.apache.catalina.core.JasperListener;
-import org.apache.catalina.core.JreMemoryLeakPreventionListener;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.core.ThreadLocalLeakPreventionListener;
 import org.apache.catalina.deploy.ApplicationParameter;
 import org.apache.catalina.deploy.ContextEnvironment;
 import org.apache.catalina.deploy.ContextResource;
-import org.apache.catalina.mbeans.GlobalResourcesLifecycleListener;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.startup.Tomcat;
@@ -53,7 +52,7 @@ import com.beust.jcommander.Parameters;
 
 public class Runner {
 
-	private static final String TIMESTAMP_FILENAME = "WAR_TIMESTAMP";
+	public static final String TIMESTAMP_FILENAME = "WAR_TIMESTAMP";
 
 	private static Tomcat tomcat;
 
@@ -61,9 +60,7 @@ public class Runner {
 	 * This method is called from the procrun service
 	 */
 	public static void start(String... args) throws Exception {
-		List<String> arguments = Arrays.asList(args);
-		arguments.add(0, "start");
-		main(arguments.toArray(new String[arguments.size()]));
+		main(args);
 	}
 
 	/**
@@ -78,7 +75,13 @@ public class Runner {
 		if (args.length == 0) {
 			arguments = new String[] { "start" };
 		} else {
-			arguments = args;
+			if ("obfuscate".equals(args[0]) || "start".equals(args[0]) || "checkConfig".equals(args[0])) {
+				arguments = args;
+			} else {
+				List<String> argumentsList = new ArrayList<>(Arrays.asList(args));
+				argumentsList.add(0, "start");
+				arguments = argumentsList.toArray(new String[argumentsList.size()]);
+			}
 		}
 
 		JCommander commander = new JCommander();
@@ -113,12 +116,13 @@ public class Runner {
 	private static void startTc(StartOptions startOptions) throws URISyntaxException, IOException, Exception,
 			ServletException, LifecycleException {
 
-		URL url = Runner.class.getProtectionDomain().getCodeSource().getLocation();
-		Path myJar = Paths.get(url.toURI());
+		URL myJarLocationURL = Runner.class.getProtectionDomain().getCodeSource().getLocation();
+		Path myJar = Paths.get(myJarLocationURL.toURI());
 		Path myJarDir = myJar.getParent();
 
 		Path configFile;
-		String pathToConfigFile = !startOptions.configFile.isEmpty() ? startOptions.configFile.get(0) : null;
+		String pathToConfigFile = startOptions.configFile != null && !startOptions.configFile.isEmpty() ? startOptions.configFile
+				.get(0) : null;
 
 		if (pathToConfigFile != null) {
 			configFile = Paths.get(pathToConfigFile);
@@ -176,6 +180,8 @@ public class Runner {
 			}
 		}
 
+		boolean isWin = System.getProperty("os.name").toLowerCase().contains("win");
+
 		Path loggingPropertyFile = extractDir.resolve("logging.properties");
 		Path loggingDir = extractDir.resolve("logs");
 		Path tempDir = extractDir.resolve("temp");
@@ -226,13 +232,39 @@ public class Runner {
 				Files.copy(is, timestampFile);
 			}
 
+			if (isWin) {
+				if (System.getProperty("os.arch").contains("64")) {
+					try (InputStream is = Runner.class.getResourceAsStream("/tcnative-1.dll.64")) {
+						if (is != null) {
+							Files.copy(is, extractDir.resolve("tcnative-1.dll"));
+						}
+					}
+				} else {
+					try (InputStream is = Runner.class.getResourceAsStream("/tcnative-1.dll.32")) {
+						if (is != null) {
+							Files.copy(is, extractDir.resolve("tcnative-1.dll"));
+						}
+					}
+				}
+			}
+
 		}
 
-		List<String> warAbsolutePaths = new ArrayList<>();
+		if (isWin) {
+			String libraryPath = System.getProperty("java.library.path");
+			libraryPath = extractDir.toString() + ";" + libraryPath;
+			System.setProperty("java.library.path", libraryPath);
+
+			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+			fieldSysPath.setAccessible(true);
+			fieldSysPath.set(null, null);
+		}
+
+		List<String> absolutePathsToEmbeddedWars = new ArrayList<>();
 
 		try (DirectoryStream<Path> wars = Files.newDirectoryStream(extractDir, "*.war")) {
 			for (Path war : wars) {
-				warAbsolutePaths.add(war.toAbsolutePath().toString());
+				absolutePathsToEmbeddedWars.add(war.toAbsolutePath().toString());
 			}
 		}
 
@@ -302,17 +334,10 @@ public class Runner {
 		// Create all server objects;
 		tomcat.getHost();
 
-		if (config.getListeners().contains(AprLifecycleListener.class.getName())) {
-			tomcat.getServer().addLifecycleListener(new AprLifecycleListener());
-		}
-		if (config.getListeners().contains(JasperListener.class.getName())) {
-			tomcat.getServer().addLifecycleListener(new JasperListener());
-		}
-		if (config.getListeners().contains(JreMemoryLeakPreventionListener.class.getName())) {
-			tomcat.getServer().addLifecycleListener(new JreMemoryLeakPreventionListener());
-		}
-		if (config.getListeners().contains(ThreadLocalLeakPreventionListener.class.getName())) {
-			tomcat.getServer().addLifecycleListener(new ThreadLocalLeakPreventionListener());
+		// Install the listeners
+		for (String listenerClassName : config.getListeners()) {
+			Class<LifecycleListener> listener = (Class<LifecycleListener>) Class.forName(listenerClassName);
+			tomcat.getServer().addLifecycleListener(listener.newInstance());
 		}
 
 		for (Connector connector : connectors) {
@@ -326,17 +351,13 @@ public class Runner {
 
 		if (config.isEnableNaming()) {
 			tomcat.enableNaming();
-
-			if (config.getListeners().contains(GlobalResourcesLifecycleListener.class.getName())) {
-				tomcat.getServer().addLifecycleListener(new GlobalResourcesLifecycleListener());
-			}
 		}
 
 		// No contexts configured. Create a default context.
 		if (config.getContexts().isEmpty()) {
 			ch.rasc.embeddedtc.runner.Context ctx = new ch.rasc.embeddedtc.runner.Context();
 			ctx.setContextPath("");
-			ctx.setWar(warAbsolutePaths.iterator().next());
+			ctx.setEmbeddedWar(absolutePathsToEmbeddedWars.iterator().next());
 			config.setContexts(Collections.singletonList(ctx));
 		}
 
@@ -348,9 +369,40 @@ public class Runner {
 				contextPath = "";
 			}
 
-			String warPath = configuredContext.getWar();
-			if (warPath == null) {
-				warPath = warAbsolutePaths.iterator().next();
+			String warPath = null;
+
+			if (configuredContext.getEmbeddedWar() != null) {
+				if (configuredContext.getEmbeddedWar().contains("*")) {
+					String regex = "^"
+							+ configuredContext.getEmbeddedWar().replaceAll("\\.", "\\\\.").replaceAll("\\", "\\\\")
+									.replaceAll("\\*", ".*?") + "$";
+					Pattern pattern = Pattern.compile(regex);
+
+					for (String warAbsolutePath : absolutePathsToEmbeddedWars) {
+						Matcher matcher = pattern.matcher(warAbsolutePath);
+						if (matcher.matches()) {
+							warPath = warAbsolutePath;
+							break;
+						}
+					}
+				} else {
+					warPath = configuredContext.getEmbeddedWar();
+				}
+
+				if (warPath == null) {
+					warPath = absolutePathsToEmbeddedWars.iterator().next();
+				}
+			} else if (configuredContext.getExternalWar() != null) {
+				Path externWarPath = Paths.get(configuredContext.getExternalWar());
+				if (externWarPath.isAbsolute()) {
+					warPath = configuredContext.getExternalWar();
+				} else {
+					warPath = myJarDir.resolve(configuredContext.getExternalWar()).toString();
+				}
+			} else {
+				// As a default, if no war is specified, take the first war
+				// that's embedded in our jar
+				warPath = absolutePathsToEmbeddedWars.iterator().next();
 			}
 
 			Context ctx = tomcat.addWebapp(contextPath, warPath);
@@ -379,7 +431,7 @@ public class Runner {
 					}
 				}
 			} else {
-				URL contextFileURL = getContextXml(configuredContext.getWar());
+				URL contextFileURL = getContextXml(warPath);
 				if (contextFileURL != null) {
 					ctx.setConfigFile(contextFileURL);
 				}
@@ -432,6 +484,6 @@ public class Runner {
 		private List<String> configFile;
 
 		@Parameter(names = { "-p", "--password" }, description = "The password")
-		private String password = null;
+		private final String password = null;
 	}
 }

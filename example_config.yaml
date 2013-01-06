@@ -19,9 +19,8 @@ systemProperties:
   two: secondProperty
 
 
-# If not specified then these listeners will be added by default.
-# GlobalResourcesLifecycleListener only if jndi is enabled
-# If specified then only the listed listeners will be added
+# If not specified the 'org.apache.catalina.core.AprLifecycleListener' will be added by default
+# If specified then only the listed listeners will be added or none if list is empty
 listeners: 
   - org.apache.catalina.core.AprLifecycleListener
   - org.apache.catalina.core.JasperListener
@@ -63,10 +62,13 @@ connector:
 # Specifies one web application. If no context or contexts section is specified then the Runner 
 # will deploy the first war file he findes to the ROOT context.       
 context: 
-  # Regular expression that specifies the war file. .* is the default value and the Runner chooses the first war he finds
-  war: .*
-  TODO: embeddedWar
-  TODO: externalWar
+  # Name of a embedded war file. If not specified the runner takes the first war he finds.
+  # As a joker the character * is supported
+  embeddedWar: test-*.war
+  
+  # Absolute or relative path to an external (not embedded in our jar) war. If the path is relative the runner
+  # resolves it with the directory of the jar as base.
+  externalWar: 
     
   # Specifies an external context xml file. If this parameter points to a valid context xml file then 
   # searching for the /META-INF/context.xml file in the war is skipped. 
