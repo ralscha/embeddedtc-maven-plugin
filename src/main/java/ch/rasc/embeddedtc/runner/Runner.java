@@ -149,7 +149,9 @@ public class Runner {
 		// System.out.println(config);
 
 		for (Map.Entry<String, Object> entry : config.getSystemProperties().entrySet()) {
-			System.setProperty(entry.getKey(), entry.getValue().toString());
+			String value = entry.getValue().toString();
+			value = ObfuscateUtil.toPlaintext(value, startOptions.password);
+			System.setProperty(entry.getKey(), value);
 		}
 
 		Path configuredPathToExtractDir = Paths.get(config.getExtractDirectory());
@@ -366,6 +368,7 @@ public class Runner {
 
 		List<Context> contextsWithoutSessionPersistence = new ArrayList<>();
 		for (ch.rasc.embeddedtc.runner.Context configuredContext : config.getContexts()) {
+			configuredContext.decryptPasswords(startOptions.password);
 
 			String contextPath = configuredContext.getContextPath();
 			if (contextPath == null) {
@@ -449,7 +452,7 @@ public class Runner {
 					}
 				}
 			});
-			
+
 			if (!configuredContext.isSessionPersistence()) {
 				contextsWithoutSessionPersistence.add(ctx);
 			}

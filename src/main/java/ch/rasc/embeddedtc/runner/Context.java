@@ -2,6 +2,7 @@ package ch.rasc.embeddedtc.runner;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -152,6 +153,51 @@ public class Context {
 		}
 
 		return crObjects;
+	}
+
+	public void decryptPasswords(String password) {
+		if (parameter != null) {
+			parameter.setValue(ObfuscateUtil.toPlaintext(parameter.getValue(), password));
+		}
+
+		if (resource != null) {
+			Map<String, Object> newResource = new HashMap<>();
+			for (Map.Entry<String, Object> entry : resource.entrySet()) {
+				if (entry.getValue() instanceof String) {
+					newResource.put(entry.getKey(), ObfuscateUtil.toPlaintext((String) entry.getValue(), password));
+				} else {
+					newResource.put(entry.getKey(), entry.getValue());
+				}
+			}
+			resource = newResource;
+		}
+
+		if (environment != null) {
+			environment.setValue(ObfuscateUtil.toPlaintext(environment.getValue(), password));
+		}
+
+		List<Map<String, Object>> newResources = new ArrayList<>();
+		for (Map<String, Object> res : resources) {
+			Map<String, Object> newResource = new HashMap<>();
+			for (Map.Entry<String, Object> entry : res.entrySet()) {
+				if (entry.getValue() instanceof String) {
+					newResource.put(entry.getKey(), ObfuscateUtil.toPlaintext((String) entry.getValue(), password));
+				} else {
+					newResource.put(entry.getKey(), entry.getValue());
+				}
+			}
+			newResources.add(newResource);
+		}
+		resources = newResources;
+
+		for (ContextEnvironment ce : environments) {
+			ce.setValue(ObfuscateUtil.toPlaintext(ce.getValue(), password));
+		}
+
+		for (ApplicationParameter ap : parameters) {
+			ap.setValue(ObfuscateUtil.toPlaintext(ap.getValue(), password));
+		}
+
 	}
 
 	@Override

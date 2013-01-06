@@ -159,7 +159,6 @@ public class PackageTcWarMojo extends AbstractMojo {
 					aos.putArchiveEntry(new JarArchiveEntry("tcnative-1.dll.64"));
 					Files.copy(Paths.get(includeTcNativeWin64), aos);
 					aos.closeArchiveEntry();
-
 				}
 
 				String[] runnerClasses = { "ch.rasc.embeddedtc.runner.CheckConfig$CheckConfigOptions",
