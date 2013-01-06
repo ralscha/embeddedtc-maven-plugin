@@ -167,7 +167,8 @@ public class PackageTcWarMojo extends AbstractMojo {
 						"ch.rasc.embeddedtc.runner.Context", "ch.rasc.embeddedtc.runner.DeleteDirectory",
 						"ch.rasc.embeddedtc.runner.ObfuscateUtil$ObfuscateOptions",
 						"ch.rasc.embeddedtc.runner.ObfuscateUtil", "ch.rasc.embeddedtc.runner.Runner$1",
-						"ch.rasc.embeddedtc.runner.Runner$StartOptions", "ch.rasc.embeddedtc.runner.Runner" };
+						"ch.rasc.embeddedtc.runner.Runner$2", "ch.rasc.embeddedtc.runner.Runner$StartOptions",
+						"ch.rasc.embeddedtc.runner.Runner" };
 
 				for (String rc : runnerClasses) {
 					String classAsPath = rc.replace('.', '/') + ".class";

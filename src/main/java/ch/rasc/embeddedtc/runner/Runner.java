@@ -31,10 +31,13 @@ import javax.servlet.ServletException;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
+import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
+import org.apache.catalina.LifecycleState;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.deploy.ApplicationParameter;
 import org.apache.catalina.deploy.ContextEnvironment;
 import org.apache.catalina.deploy.ContextResource;
@@ -437,6 +440,16 @@ public class Runner {
 				}
 			}
 
+			// Shutdown tomcat if a failure occurs during startup
+			ctx.addLifecycleListener(new LifecycleListener() {
+				@Override
+				public void lifecycleEvent(LifecycleEvent event) {
+					if (event.getLifecycle().getState() == LifecycleState.FAILED) {
+						((StandardServer) tomcat.getServer()).stopAwait();
+					}
+				}
+			});
+			
 			if (!configuredContext.isSessionPersistence()) {
 				contextsWithoutSessionPersistence.add(ctx);
 			}
