@@ -29,33 +29,45 @@ listeners:
   - org.apache.catalina.core.ThreadLocalLeakPreventionListener
 
 # List of connectors.
-# If no connector is specfied the Runner creates a default connector with protocol HTTP/1.1 and port 8080.
-# If only port is specified protocol is set to HTTP/1.1 
+# If no connector is specfied the Runner creates a default connector with protocol HTTP/1.1, port 8080, 
+# connectionTimeout 60 seconds and URIEnconding UTF-8
 connectors:
-  # HTTP Connector
+    # HTTP Connector
+    # Default value 8080
   - port: 8080
-    protocol: HTTP/1.1
+
     # These values are valid.
     # HTTP/1.1 - Auto switching. If APR library is available then APR connector, if not then blocking Java connector
     # org.apache.coyote.http11.Http11Protocol - blocking Java connector
     # org.apache.coyote.http11.Http11NioProtocol - non blocking Java connector
     # org.apache.coyote.http11.Http11AprProtocol - the APR/native connector.
+    # Default value HTTP/1.1 
+    protocol: HTTP/1.1
+  
+    # Default value 60000  
     connectionTimeout: 20000
+    
+    # Default value UTF-8
     URIEncoding: UTF-8
  
   # AJP Connector
   - port: 8009
-    protocol: AJP/1.3
+    
     # These values are valid
     # AJP/1.3 - Auto switching. If APR library is available then APR connector, if not then blocking Java connector
     # org.apache.coyote.ajp.AjpProtocol - blocking Java connector
     # org.apache.coyote.ajp.AjpNioProtocol - non blocking Java connector.
-    # org.apache.coyote.ajp.AjpAprProtocol - the APR/native connector.
+    # org.apache.coyote.ajp.AjpAprProtocol - the APR/native connector.  
+    protocol: AJP/1.3    
+    
+    # if omitted URIEnconding is set to UTF-8
     URIEncoding: UTF-8
+    
     tomcatAuthentication: false
     
 # As an option if only one connector is needed 
-# If only port is specified protocol is set to HTTP/1.1 
+# If only port is specified protocol is set to HTTP/1.1, URIEncoding to UTF-8 and
+# connectionTimeout to 60000 
 connector: 
   port: 80
 

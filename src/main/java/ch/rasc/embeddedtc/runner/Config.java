@@ -116,6 +116,8 @@ public class Config {
 	}
 
 	private static final String CONNECTOR_PROTOCOL = "protocol";
+	private static final String CONNECTOR_PORT = "port";
+	private static final String CONNECTOR_URIENCODING = "URIEncoding";
 
 	public List<Connector> createConnectorObjects() throws Exception {
 		List<Connector> conObjects = new ArrayList<>();
@@ -135,12 +137,20 @@ public class Config {
 			}
 			Connector tcConnector = new Connector(protocol.toString());
 
+			if (!con.containsKey(CONNECTOR_PORT)) {
+				con.put(CONNECTOR_PORT, 8080);
+			}
+			
+			if (!con.containsKey(CONNECTOR_URIENCODING)) {
+				con.put(CONNECTOR_URIENCODING, "UTF-8");
+			}
+			
 			for (Map.Entry<String, Object> entry : con.entrySet()) {
 				if (!entry.getKey().equals(CONNECTOR_PROTOCOL)) {
 					IntrospectionUtils.setProperty(tcConnector, entry.getKey(), entry.getValue().toString());
 				}
 			}
-
+			
 			conObjects.add(tcConnector);
 		}
 
