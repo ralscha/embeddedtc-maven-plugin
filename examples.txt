@@ -68,7 +68,7 @@ context:
 
   environment:
     name: email
-    value: ct@ess.ch
+    value: test@test.com
     type: java.lang.String
 
 
