@@ -357,6 +357,7 @@ public class Runner {
 
 		// Install the listeners
 		for (String listenerClassName : config.getListeners()) {
+			@SuppressWarnings("unchecked")
 			Class<LifecycleListener> listener = (Class<LifecycleListener>) Class.forName(listenerClassName);
 			tomcat.getServer().addLifecycleListener(listener.newInstance());
 		}
