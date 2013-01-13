@@ -87,6 +87,9 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 	@Parameter
 	private List<Dependency> extraDependencies;
+	
+	@Parameter
+	private List<Dependency> extraWars;	
 
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -100,15 +103,43 @@ public class PackageTcWarMojo extends AbstractMojo {
 					ArchiveOutputStream aos = new ArchiveStreamFactory().createArchiveOutputStream(
 							ArchiveStreamFactory.JAR, os)) {
 
-				File projectArtifact = project.getArtifact().getFile();
-				if (projectArtifact != null && Files.exists(projectArtifact.toPath())) {
-					aos.putArchiveEntry(new JarArchiveEntry(projectArtifact.getName()));
-					try (InputStream is = Files.newInputStream(projectArtifact.toPath())) {
-						IOUtils.copy(is, aos);
+				//If project is a war project add the war to the project
+				if ("war".equalsIgnoreCase(project.getPackaging())) {
+					File projectArtifact = project.getArtifact().getFile();
+					if (projectArtifact != null && Files.exists(projectArtifact.toPath())) {
+						aos.putArchiveEntry(new JarArchiveEntry(projectArtifact.getName()));
+						try (InputStream is = Files.newInputStream(projectArtifact.toPath())) {
+							IOUtils.copy(is, aos);
+						}
+						aos.closeArchiveEntry();
 					}
-					aos.closeArchiveEntry();
 				}
+				
+				//Add additional wars into the jar
+				if (extraWars != null) {
+					for (Dependency extraWarDependency : extraWars) {
+						ArtifactRequest request = new ArtifactRequest();
+						request.setArtifact(new DefaultArtifact(extraWarDependency.getGroupId(), extraWarDependency.getArtifactId(),
+								extraWarDependency.getType(), extraWarDependency.getVersion()));
 
+						ArtifactResult result;
+						try {
+							result = repoSystem.resolveArtifact(repoSession, request);
+						} catch (ArtifactResolutionException e) {
+							throw new MojoExecutionException(e.getMessage(), e);
+						}
+
+						File extraWarFile = result.getArtifact().getFile();
+						aos.putArchiveEntry(new JarArchiveEntry(extraWarFile.getName()));
+						try (InputStream is = Files.newInputStream(extraWarFile.toPath())) {
+							IOUtils.copy(is, aos);
+						}
+						aos.closeArchiveEntry();
+						
+					}
+				}
+				
+				
 				Set<String> includeArtifacts = new HashSet<>();
 				includeArtifacts.add("org.apache.tomcat:tomcat-jdbc");
 				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-core");
