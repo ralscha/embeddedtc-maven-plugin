@@ -180,7 +180,7 @@ public class Runner {
 
 		boolean extractWar = true;
 
-		if (Files.exists(extractDir)) {
+		if (Files.exists(extractDir) && !startOptions.clean) {
 			Path timestampFile = extractDir.resolve(TIMESTAMP_FILENAME);
 			if (Files.exists(timestampFile)) {
 				byte[] extractTimestampBytes = Files.readAllBytes(timestampFile);
@@ -208,7 +208,8 @@ public class Runner {
 		Path tempDir = extractDir.resolve("temp");
 		final Path defaultWebxmlFile = extractDir.resolve("web.xml");
 
-		if (extractWar) {
+		if (extractWar || startOptions.clean) {
+
 			if (Files.exists(extractDir)) {
 				Files.walkFileTree(extractDir, new DeleteDirectory());
 			}
@@ -521,6 +522,9 @@ public class Runner {
 		private List<String> configFile;
 
 		@Parameter(names = { "-p", "--password" }, description = "The password")
-		private final String password = null;
+		private String password;
+
+		@Parameter(names = { "-c", "--clean" }, description = "Force deletion of extraction directory at startup")
+		private boolean clean;
 	}
 }
