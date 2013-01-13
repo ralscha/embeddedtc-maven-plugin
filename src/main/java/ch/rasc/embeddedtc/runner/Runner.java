@@ -400,7 +400,7 @@ public class Runner {
 
 			if (configuredContext.getEmbeddedWar() != null) {
 				if (configuredContext.getEmbeddedWar().contains("*")) {
-					String regex = "^"
+					String regex = ".*?"
 							+ configuredContext.getEmbeddedWar().replace("\\", "\\\\").replace(".", "\\.")
 									.replace("*", ".*?") + "$";
 					Pattern pattern = Pattern.compile(regex);
