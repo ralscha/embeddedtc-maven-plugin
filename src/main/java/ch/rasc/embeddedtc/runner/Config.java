@@ -192,7 +192,7 @@ public class Config {
 				Runner.getLogger().warning("Missing className option in valve configuration");
 				continue;
 			}
-			
+
 			Class<Valve> valveClass = null;
 
 			try {
