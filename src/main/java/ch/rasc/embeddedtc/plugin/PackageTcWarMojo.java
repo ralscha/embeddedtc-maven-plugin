@@ -48,7 +48,6 @@ import org.codehaus.plexus.archiver.jar.Manifest;
 import org.codehaus.plexus.archiver.jar.ManifestException;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.resolution.ArtifactRequest;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
@@ -67,9 +66,6 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${repositorySystemSession}")
 	private RepositorySystemSession repoSession;
-
-	@Parameter(defaultValue = "${project.remotePluginRepositories}")
-	private List<RemoteRepository> remoteRepos;
 
 	@Parameter(defaultValue = "${plugin.artifacts}", required = true)
 	private List<Artifact> pluginArtifacts;
@@ -140,9 +136,6 @@ public class PackageTcWarMojo extends AbstractMojo {
 						ArtifactRequest request = new ArtifactRequest();
 						request.setArtifact(new DefaultArtifact(dependency.getGroupId(), dependency.getArtifactId(),
 								dependency.getType(), dependency.getVersion()));
-						request.setRepositories(remoteRepos);
-
-						getLog().info("Resolving artifact " + dependency + " from " + remoteRepos);
 
 						ArtifactResult result;
 						try {
@@ -221,18 +214,11 @@ public class PackageTcWarMojo extends AbstractMojo {
 		aos.closeArchiveEntry();
 	}
 
-	// private static Set<String> fileNames = new HashSet<>();
-
 	private static void extractJarToArchive(JarFile file, ArchiveOutputStream aos) throws IOException {
 		Enumeration<? extends JarEntry> entries = file.entries();
 		while (entries.hasMoreElements()) {
 			JarEntry j = entries.nextElement();
 			if (!"META-INF/MANIFEST.MF".equals(j.getName())) {
-				// if (fileNames.contains(j.getName())) {
-				// System.out.println(j.getName());
-				// } else {
-				// fileNames.add(j.getName());
-				// }
 				aos.putArchiveEntry(new JarArchiveEntry(j.getName()));
 				IOUtils.copy(file.getInputStream(j), aos);
 				aos.closeArchiveEntry();
