@@ -1,0 +1,83 @@
+			<plugin>
+				<groupId>ch.rasc</groupId>
+				<artifactId>embeddedtc-maven-plugin</artifactId>
+				<version>1.0.0-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>package-tcwar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<finalName>ct.jar</finalName>
+					<includeTcNativeWin32>D:\java\tomcat-native-1.1.24-win32-bin\bin\tcnative-1.dll</includeTcNativeWin32>
+					<includeTcNativeWin64>D:\java\tomcat-native-1.1.24-win32-bin\bin\x64\tcnative-1.dll</includeTcNativeWin64>
+					<extraDependencies>
+						<dependency>
+							<groupId>net.sourceforge.jtds</groupId>
+							<artifactId>jtds</artifactId>
+							<version>1.2.7</version>
+						</dependency>
+					</extraDependencies>
+				</configuration>
+			</plugin>
+
+===========================================================
+			<plugin>
+				<groupId>ch.rasc</groupId>
+				<artifactId>embeddedtc-maven-plugin</artifactId>
+				<version>1.0.0-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>package-tcwar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<finalName>test.jar</finalName>
+				    <includeJSPSupport>false</includeJSPSupport>					
+				</configuration>
+			</plugin>
+===========================================================
+extractDirectory: ct
+
+silent: false
+  
+connector:
+  port: 8080  
+  
+systemProperties:
+  ess.development.customer: ksw  
+  
+context:
+  resource:
+    name: jdbc/ct
+    factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
+    auth: Container
+    type: javax.sql.DataSource
+    username: ENCxXOVLI1ckZM=ndRKXnaBYD4=
+    password: ENCjuqjztvF6Oo=CQrDnW/POX8F/rRELBpH3g==
+    driverClassName: net.sourceforge.jtds.jdbc.Driver
+    url: jdbc:jtds:sqlserver://192.168.20.165/ct
+    maxActive: 5
+    maxIdle: 1
+    maxWait: 10000
+    defaultAutoCommit: false
+
+  environment:
+    name: email
+    value: ct@ess.ch
+    type: java.lang.String
+
+
+
+===========================================================			
+valve:
+  className: org.apache.catalina.valves.AccessLogValve
+  directory: logs
+  prefix: localhost_access_log
+  suffix: .txt
+  pattern: "%h %l %u %t \"%r\" %s %b"
+			
