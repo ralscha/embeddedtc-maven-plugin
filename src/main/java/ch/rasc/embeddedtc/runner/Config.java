@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
 import org.apache.tomcat.util.IntrospectionUtils;
 
@@ -30,9 +31,13 @@ public class Config {
 
 	private String extractDirectory = "tc";
 
+	private boolean silent = false;
+
 	private String jvmRoute;
 
-	private boolean silent = false;
+	private List<Map<String, Object>> valves = Collections.emptyList();
+
+	private Map<String, Object> valve;
 
 	private Set<String> listeners = new HashSet<>(Arrays.asList("org.apache.catalina.core.AprLifecycleListener"));
 
@@ -78,6 +83,14 @@ public class Config {
 		this.connector = connector;
 	}
 
+	public void setValves(List<Map<String, Object>> valves) {
+		this.valves = valves;
+	}
+
+	public void setValve(Map<String, Object> valve) {
+		this.valve = valve;
+	}
+
 	public List<Context> getContexts() {
 		if (context != null) {
 			if (contexts.isEmpty()) {
@@ -116,7 +129,9 @@ public class Config {
 	}
 
 	private static final String CONNECTOR_PROTOCOL = "protocol";
+
 	private static final String CONNECTOR_PORT = "port";
+
 	private static final String CONNECTOR_URIENCODING = "URIEncoding";
 
 	public List<Connector> createConnectorObjects() throws Exception {
@@ -140,21 +155,70 @@ public class Config {
 			if (!con.containsKey(CONNECTOR_PORT)) {
 				con.put(CONNECTOR_PORT, 8080);
 			}
-			
+
 			if (!con.containsKey(CONNECTOR_URIENCODING)) {
 				con.put(CONNECTOR_URIENCODING, "UTF-8");
 			}
-			
+
 			for (Map.Entry<String, Object> entry : con.entrySet()) {
 				if (!entry.getKey().equals(CONNECTOR_PROTOCOL)) {
 					IntrospectionUtils.setProperty(tcConnector, entry.getKey(), entry.getValue().toString());
 				}
 			}
-			
+
 			conObjects.add(tcConnector);
 		}
 
 		return conObjects;
+	}
+
+	private static final String VALVE_CLASSNAME = "className";
+
+	public List<Valve> createValveObjects() {
+		List<Valve> valveObjects = new ArrayList<>();
+
+		if (valve != null) {
+			if (valves.isEmpty()) {
+				setValves(Collections.singletonList(valve));
+			} else {
+				valves.add(valve);
+			}
+		}
+
+		for (Map<String, Object> v : valves) {
+			String className = (String) v.get(VALVE_CLASSNAME);
+			if (className == null) {
+				Runner.getLogger().warning("Missing className option in valve configuration");
+				continue;
+			}
+
+			Class<Valve> valveClass = null;
+
+			try {
+				valveClass = (Class<Valve>) Class.forName(className);
+			} catch (ClassNotFoundException e) {
+				Runner.getLogger().warning("Valve className '" + className + "' not found");
+				continue;
+			}
+
+			Valve valveObject;
+			try {
+				valveObject = valveClass.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				Runner.getLogger().warning("Instantiation of class '" + className + "' failed: " + e.getMessage());
+				continue;
+			}
+
+			for (Map.Entry<String, Object> entry : v.entrySet()) {
+				if (!entry.getKey().equals(VALVE_CLASSNAME)) {
+					IntrospectionUtils.setProperty(valveObject, entry.getKey(), entry.getValue().toString());
+				}
+			}
+
+			valveObjects.add(valveObject);
+		}
+
+		return valveObjects;
 	}
 
 	public boolean isEnableNaming() {

@@ -50,6 +50,7 @@ import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.LifecycleState;
+import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardServer;
@@ -369,6 +370,10 @@ public class Runner {
 			tomcat.getEngine().setJvmRoute(config.getJvmRoute());
 		}
 
+		for (Valve valve : config.createValveObjects()) {
+			tomcat.getHost().getPipeline().addValve(valve);
+		}
+
 		if (config.isEnableNaming()) {
 			tomcat.enableNaming();
 		}
@@ -497,7 +502,7 @@ public class Runner {
 		return null;
 	}
 
-	private static Logger getLogger() {
+	public static Logger getLogger() {
 		return Logger.getLogger(Runner.class.getName());
 	}
 
