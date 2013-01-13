@@ -46,7 +46,7 @@ public class Bootstrap {
 			Thread.currentThread().setContextClassLoader(classLoader);
 			
 			Class<?> runnerClass = classLoader.loadClass("ch.rasc.embeddedtc.runner.Runner");
-			Method mainMethod = runnerClass.getMethod("start", new Class[] { args.getClass() });
+			Method mainMethod = runnerClass.getMethod("main", new Class[] { args.getClass() });
 
 			mainMethod.invoke(null, new Object[] { args });
 		}
