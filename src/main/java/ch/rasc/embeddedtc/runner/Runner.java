@@ -401,8 +401,8 @@ public class Runner {
 			if (configuredContext.getEmbeddedWar() != null) {
 				if (configuredContext.getEmbeddedWar().contains("*")) {
 					String regex = "^"
-							+ configuredContext.getEmbeddedWar().replaceAll("\\.", "\\\\.").replaceAll("\\", "\\\\")
-									.replaceAll("\\*", ".*?") + "$";
+							+ configuredContext.getEmbeddedWar().replace("\\", "\\\\").replace(".", "\\.")
+									.replace("*", ".*?") + "$";
 					Pattern pattern = Pattern.compile(regex);
 
 					for (String warAbsolutePath : absolutePathsToEmbeddedWars) {
