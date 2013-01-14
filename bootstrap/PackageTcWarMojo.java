@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
@@ -44,6 +45,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.jar.Manifest;
+import org.codehaus.plexus.archiver.jar.ManifestException;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.resolution.ArtifactRequest;
@@ -84,6 +86,9 @@ public class PackageTcWarMojo extends AbstractMojo {
 	@Parameter(defaultValue = "true", required = true)
 	private boolean includeJSPSupport;
 
+	@Parameter(defaultValue = "false", required = true)
+	private boolean useBootstrap;
+
 	@Parameter
 	private List<Dependency> extraDependencies;
 
@@ -93,14 +98,12 @@ public class PackageTcWarMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 
-		Path bootstrapJar = Paths.get(buildDirectory, finalName);
-		Path runnerJar = Paths.get(buildDirectory, "runner.jar");
+		Path warExecFile = Paths.get(buildDirectory, finalName);
 		try {
-			Files.deleteIfExists(bootstrapJar);
-			Files.deleteIfExists(runnerJar);
-			Files.createDirectories(bootstrapJar.getParent());
+			Files.deleteIfExists(warExecFile);
+			Files.createDirectories(warExecFile.getParent());
 
-			try (OutputStream os = Files.newOutputStream(runnerJar);
+			try (OutputStream os = Files.newOutputStream(warExecFile);
 					ArchiveOutputStream aos = new ArchiveStreamFactory().createArchiveOutputStream(
 							ArchiveStreamFactory.JAR, os)) {
 
@@ -218,45 +221,65 @@ public class PackageTcWarMojo extends AbstractMojo {
 					}
 				}
 
+				if (!useBootstrap) {
+					Manifest manifest = new Manifest();
+
+					Manifest.Attribute mainClassAtt = new Manifest.Attribute();
+					mainClassAtt.setName("Main-Class");
+					mainClassAtt.setValue(Runner.class.getName());
+					manifest.addConfiguredAttribute(mainClassAtt);
+
+					aos.putArchiveEntry(new JarArchiveEntry("META-INF/MANIFEST.MF"));
+					manifest.write(aos);
+					aos.closeArchiveEntry();
+				}
+				
 				aos.putArchiveEntry(new JarArchiveEntry(Runner.TIMESTAMP_FILENAME));
 				aos.write(String.valueOf(System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8));
 				aos.closeArchiveEntry();
 
 			}
 
-			// Embedd runner.jar into bootstrap.jar
-			try (OutputStream os = Files.newOutputStream(bootstrapJar);
-					ArchiveOutputStream aos = new ArchiveStreamFactory().createArchiveOutputStream(
-							ArchiveStreamFactory.JAR, os)) {
+			if (useBootstrap) {
+				Path runnerJar = warExecFile.resolveSibling("runner.jar");
+				Files.deleteIfExists(runnerJar);
+				Files.move(warExecFile, runnerJar);
 
-				String classAsPath = Bootstrap.class.getName().replace('.', '/') + ".class";
+				Path bootstrapJar = Paths.get(buildDirectory, finalName);
 
-				try (InputStream is = getClass().getResourceAsStream("/" + classAsPath)) {
-					aos.putArchiveEntry(new JarArchiveEntry(classAsPath));
-					IOUtils.copy(is, aos);
+				try (OutputStream os = Files.newOutputStream(bootstrapJar);
+						ArchiveOutputStream aos = new ArchiveStreamFactory().createArchiveOutputStream(
+								ArchiveStreamFactory.JAR, os)) {
+
+					String classAsPath = Bootstrap.class.getName().replace('.', '/') + ".class";
+
+					try (InputStream is = getClass().getResourceAsStream("/" + classAsPath)) {
+						aos.putArchiveEntry(new JarArchiveEntry(classAsPath));
+						IOUtils.copy(is, aos);
+						aos.closeArchiveEntry();
+					}
+
+					Manifest manifest = new Manifest();
+
+					Manifest.Attribute mainClassAtt = new Manifest.Attribute();
+					mainClassAtt.setName("Main-Class");
+					mainClassAtt.setValue(Bootstrap.class.getName());
+					manifest.addConfiguredAttribute(mainClassAtt);
+
+					aos.putArchiveEntry(new JarArchiveEntry("META-INF/MANIFEST.MF"));
+					manifest.write(aos);
+					aos.closeArchiveEntry();
+
+					aos.putArchiveEntry(new JarArchiveEntry(runnerJar.getFileName().toString()));
+					try (InputStream is = Files.newInputStream(runnerJar)) {
+						IOUtils.copy(is, aos);
+					}
 					aos.closeArchiveEntry();
 				}
 
-				Manifest manifest = new Manifest();
-
-				Manifest.Attribute mainClassAtt = new Manifest.Attribute();
-				mainClassAtt.setName("Main-Class");
-				mainClassAtt.setValue(Bootstrap.class.getName());
-				manifest.addConfiguredAttribute(mainClassAtt);
-
-				aos.putArchiveEntry(new JarArchiveEntry("META-INF/MANIFEST.MF"));
-				manifest.write(aos);
-				aos.closeArchiveEntry();
-
-				aos.putArchiveEntry(new JarArchiveEntry(runnerJar.getFileName().toString()));
-				try (InputStream is = Files.newInputStream(runnerJar)) {
-					IOUtils.copy(is, aos);
-				}
-				aos.closeArchiveEntry();
-
 			}
 
-		} catch (Exception e) {
+		} catch (IOException | ArchiveException | ManifestException e) {
 			throw new MojoExecutionException(e.getMessage(), e);
 		}
 	}
