@@ -117,7 +117,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ecj</groupId>
+			<groupId>org.eclipse.jdt.core.compiler</groupId>
 			<artifactId>ecj</artifactId>
 			<version>4.2.1</version>
 		</dependency>
