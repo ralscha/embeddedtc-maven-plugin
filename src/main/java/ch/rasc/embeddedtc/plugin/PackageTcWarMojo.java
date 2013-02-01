@@ -37,6 +37,7 @@ import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
@@ -46,6 +47,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.jar.Manifest;
 import org.codehaus.plexus.archiver.jar.ManifestException;
+import org.codehaus.plexus.util.DirectoryScanner;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.resolution.ArtifactRequest;
@@ -91,6 +93,9 @@ public class PackageTcWarMojo extends AbstractMojo {
 	@Parameter
 	private List<Dependency> extraWars;
 
+	@Parameter
+	private List<Resource> extraResources;
+
 	@Override
 	public void execute() throws MojoExecutionException {
 
@@ -115,7 +120,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 					}
 				}
 
-				// Add additional wars into the jar
+				// Add extraWars into the jar
 				if (extraWars != null) {
 					for (Dependency extraWarDependency : extraWars) {
 						ArtifactRequest request = new ArtifactRequest();
@@ -135,6 +140,37 @@ public class PackageTcWarMojo extends AbstractMojo {
 							IOUtils.copy(is, aos);
 						}
 						aos.closeArchiveEntry();
+
+					}
+				}
+
+				// Add extraResources into the jar. Folder /extra
+				if (extraResources != null) {
+					for (Resource extraResource : extraResources) {
+						DirectoryScanner directoryScanner = new DirectoryScanner();
+						directoryScanner.setBasedir(extraResource.getDirectory());
+
+						directoryScanner.setExcludes(extraResource.getExcludes().toArray(
+								new String[extraResource.getExcludes().size()]));
+
+						if (!extraResource.getIncludes().isEmpty()) {
+							directoryScanner.setIncludes(extraResource.getIncludes().toArray(
+									new String[extraResource.getIncludes().size()]));
+						} else {
+							// include everything by default
+							directoryScanner.setIncludes(new String[] { "**" });
+						}
+
+						directoryScanner.scan();
+						for (String includeFile : directoryScanner.getIncludedFiles()) {
+							aos.putArchiveEntry(new JarArchiveEntry(Runner.EXTRA_RESOURCES_DIR + "/" + includeFile));
+
+							Path extraFile = Paths.get(extraResource.getDirectory(), includeFile);
+							try (InputStream is = Files.newInputStream(extraFile)) {
+								IOUtils.copy(is, aos);
+							}
+							aos.closeArchiveEntry();
+						}
 
 					}
 				}
@@ -255,4 +291,5 @@ public class PackageTcWarMojo extends AbstractMojo {
 			}
 		}
 	}
+
 }

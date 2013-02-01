@@ -73,6 +73,8 @@ public class Runner {
 
 	public static final String TIMESTAMP_FILENAME = "WAR_TIMESTAMP";
 
+	public static final String EXTRA_RESOURCES_DIR = "extra";
+
 	private static Tomcat tomcat;
 
 	/**
