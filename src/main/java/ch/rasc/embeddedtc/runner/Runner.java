@@ -222,15 +222,19 @@ public class Runner {
 
 			CodeSource src = Runner.class.getProtectionDomain().getCodeSource();
 			List<String> warList = new ArrayList<>();
+			List<String> extraList = new ArrayList<>();
 
 			if (src != null) {
 				URL jar = src.getLocation();
 				ZipInputStream zip = new ZipInputStream(jar.openStream());
 				ZipEntry ze = null;
 
+				String extraDirName = EXTRA_RESOURCES_DIR + "/";
 				while ((ze = zip.getNextEntry()) != null) {
 					String entryName = ze.getName();
-					if (entryName.endsWith(".war")) {
+					if (entryName.startsWith(extraDirName)) {
+						extraList.add(entryName);
+					} else if (entryName.endsWith(".war")) {
 						warList.add(entryName);
 					}
 				}
@@ -249,6 +253,19 @@ public class Runner {
 
 			try (InputStream is = Runner.class.getResourceAsStream("/conf/logging.properties")) {
 				Files.copy(is, loggingPropertyFile);
+			}
+
+			if (!extraList.isEmpty()) {
+				for (String extra : extraList) {
+					Path extraFile = extractDir.resolve(extra);
+					Files.createDirectories(extraFile.getParent());
+					try (InputStream is = Runner.class.getResourceAsStream("/" + extra)) {
+						Files.copy(is, extraFile);
+					}
+
+					System.setProperty("EXTRA_RESOURCES_DIR", extractDir.resolve(EXTRA_RESOURCES_DIR).toAbsolutePath()
+							.toString());
+				}
 			}
 
 			Path timestampFile = extractDir.resolve(TIMESTAMP_FILENAME);
@@ -304,7 +321,9 @@ public class Runner {
 					// nothing here
 				}
 			} catch (IOException e) {
-				getLogger().severe("PORT " + connector.getPort() + " ALREADY IN USE");
+				String msg = "PORT " + connector.getPort() + " ALREADY IN USE";
+				System.err.println(msg);
+				getLogger().severe(msg);
 				return;
 			}
 		}
@@ -382,7 +401,7 @@ public class Runner {
 			tomcat.enableNaming();
 		}
 
-		// No contexts configured. Create a default context.
+		// No context configured. Create a default context.
 		if (config.getContexts().isEmpty()) {
 			ch.rasc.embeddedtc.runner.Context ctx = new ch.rasc.embeddedtc.runner.Context();
 			ctx.setContextPath("");
