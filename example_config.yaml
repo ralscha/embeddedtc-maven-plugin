@@ -1,19 +1,19 @@
-# Directory in which the runner extracts the war and creates the temp and log directories for Tomcat. 
+# Directory in which the runner extracts the war and creates the temp and log directories. 
 # The runner creates this directory if it does not exists. 
 # If this option denotes a relative path it will be resolved to the directory where the jar is located. 
-# Default value is tc. This creates a tc sub directory in the directory where the jar is located. 
+# Default value is tc. This creates a tc sub directory in the directory where the jar resides. 
 extractDirectory: tc
 
-# Has to be specifed if load-balancing is needed. Empty by default.
+# Has to be specified if load-balancing is needed. Empty by default.
 jvmRoute: server1
 
 # true sets the log level to WARN for the loggers that log information on Tomcat start up. 
-# This prevents the usual startup information being logged. f
+# This prevents the usual startup information being logged.
 # false sets the log level to the default level of INFO.
 # Default false
 silent: true
 
-# Specifies system properties. The runner sets these propertis at the beginning of the program.
+# Specifies system properties. The runner sets these properties at the beginning of the program.
 systemProperties: 
   one: 1
   two: secondProperty
@@ -29,7 +29,7 @@ listeners:
   - org.apache.catalina.core.ThreadLocalLeakPreventionListener
 
 # List of connectors.
-# If no connector is specfied the Runner creates a default connector with protocol HTTP/1.1, port 8080, 
+# If no connector is specified the Runner creates a default connector with protocol HTTP/1.1, port 8080, 
 # connectionTimeout 60 seconds and URIEnconding UTF-8
 connectors:
     # HTTP Connector
@@ -72,14 +72,14 @@ connector:
   port: 80
 
 # Specifies one web application. If no context or contexts section is specified then the Runner 
-# will deploy the first war file he findes to the ROOT context.       
+# will deploy the first war file he finds to the ROOT context.       
 context: 
   # Name of a embedded war file. If not specified the runner takes the first war he finds.
   # As a joker the character * is supported
   embeddedWar: test-*.war
   
-  # Absolute or relative path to an external (not embedded in our jar) war. If the path is relative the runner
-  # resolves it with the directory of the jar as base.
+  # Absolute or relative path to an external war (not embedded in our jar). If the path is relative the runner
+  # resolves it with the directory where the jar resides as base. If embeddedWar and externalWar are present embeddedWar takes precedence.
   externalWar: 
     
   # Specifies an external context xml file. If this parameter points to a valid context xml file then 
@@ -92,7 +92,7 @@ context:
   # Deploy webapp at the specified path
   #contextPath: /test
     
-  # If session should be persisted when tomcat shuts down. 
+  # If session should be persisted when Tomcat shuts down. 
   # Default false
   sessionPersistence: false   
     

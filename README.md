@@ -5,8 +5,8 @@ On the target machine a simple `java -jar myproject.jar` starts Tomcat and deplo
 
 The official [Tomcat Maven plugin](http://tomcat.apache.org/maven-plugin-2.1-SNAPSHOT/) also provides an executable jar creator. 
 The main difference from this plugin to the one from Apache is the runtime configuration.   
-* The Apache plugin uses well known xml files (context.xml, server.xml) and command line parameters to control the runtime behaviour.
-* This plugin uses one [yaml](http://en.wikipedia.org/wiki/YAML) configuration file that controls everything.   
+* The Apache plugin uses xml files (context.xml, server.xml) and command line parameters to control the runtime behavior.
+* This plugin uses one [yaml](http://en.wikipedia.org/wiki/YAML) configuration file that controls everything. Although it also supports /META-INF/context.xml file embedded in the war.    
 
 If the Apache plugin fits your needs then there is no reason to switch to this plugin.    
 
@@ -38,7 +38,7 @@ The plugins runs during the package phase. `mvn package` creates a war and in th
 the name &lt;artifactId&gt;-&lt;version&gt;-embeddedtc.jar. 
 The jar is about 2.7 MB bigger in size than the war file because of the embedded Tomcat classes. 
 
-The command `java -jar thejarfile.jar` starts the the embedded Tomcat 7 on port 8080 and deploys the war to the ROOT (/) context.
+The command `java -jar app.jar` starts the the embedded Tomcat 7 on port 8080 and deploys the war to the ROOT context.
  
  
 ## Plugin configuration
@@ -136,8 +136,16 @@ The embedded Tomcat is then able to use APR/native connectors and other APR feat
 ## Runtime configuration
 _TODO_
 
+#### Examples
+
+
 ## Check configuration
-_TODO_
+Because yaml is a bit picky about the file format (yaml does not like tab characters) the executable jar contains a helper method to check the configuration for errors.
+```
+java -jar app.jar checkConfig [yamlFile]
+```
+If the yaml file parameter is omitted the program tries to read the file _config.yaml_. 
+
 
 ## Obfuscate passwords
 _TODO_
