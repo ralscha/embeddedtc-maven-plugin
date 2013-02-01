@@ -130,13 +130,6 @@
 
 	</dependencies>
 
-	<repositories>
-		<repository>
-			<id>rasc.ch</id>
-			<url>http://repository.rasc.ch/</url>
-		</repository>
-	</repositories>
-
 	<build>
 		<plugins>
 			<plugin>
