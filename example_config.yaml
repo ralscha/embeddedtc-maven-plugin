@@ -167,8 +167,8 @@ context:
 # will deploy the first war file he findes to the ROOT context.  
 # Same configuration parameters as in the context section
 contexts:        
-  - war: .*
+  - embeddedWar: first*.war
     contextPath: /one
   
-  - war: 
+  - embeddedWar: second*.war
     contextPath: /two       
