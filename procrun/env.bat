@@ -1,1 +1,0 @@
-set SERVICE_NAME=TestService
