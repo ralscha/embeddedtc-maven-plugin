@@ -19,7 +19,7 @@
 
 	<inceptionYear>2013</inceptionYear>
 	<name>Embedded Tomcat Maven Plugin</name>
-	<description>Maven plugin that embedds war files and Tomcat into an executable jar</description>
+	<description>Maven plugin that embedds war files and a Tomcat 7 into one executable jar</description>
 	<url>https://github.com/ralscha/embeddedtc-maven-plugin</url>
 
 	<developers>
