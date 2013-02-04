@@ -9,7 +9,7 @@ jvmRoute: server1
 
 # true sets the log level to WARN for the loggers that log information on Tomcat start up. 
 # This prevents the usual startup information being logged.
-# false sets the log level to the default level of INFO.
+# false sets the log level to INFO.
 # Default false
 silent: true
 
@@ -44,7 +44,6 @@ connectors:
     # Default value HTTP/1.1 
     protocol: HTTP/1.1
   
-    # Default value 60000  
     connectionTimeout: 20000
     
     # Default value UTF-8
