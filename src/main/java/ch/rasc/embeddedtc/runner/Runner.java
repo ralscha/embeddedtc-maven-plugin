@@ -164,8 +164,6 @@ public class Runner {
 			config = new Config();
 		}
 
-		// System.out.println(config);
-
 		for (Map.Entry<String, Object> entry : config.getSystemProperties().entrySet()) {
 			String value = entry.getValue().toString();
 			value = ObfuscateUtil.toPlaintext(value, startOptions.password);
