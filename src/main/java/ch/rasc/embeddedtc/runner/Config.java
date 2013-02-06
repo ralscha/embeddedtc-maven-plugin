@@ -32,7 +32,9 @@ public class Config {
 	private String extractDirectory = "tc";
 
 	private boolean silent = false;
-
+	
+	private boolean useShutdownHook = false;
+	
 	private String jvmRoute;
 
 	private List<Map<String, Object>> valves = Collections.emptyList();
@@ -65,6 +67,14 @@ public class Config {
 
 	public void setSilent(boolean silent) {
 		this.silent = silent;
+	}
+
+	public boolean isUseShutdownHook() {
+		return useShutdownHook;
+	}
+
+	public void setUseShutdownHook(boolean useShutdownHook) {
+		this.useShutdownHook = useShutdownHook;
 	}
 
 	public Set<String> getListeners() {
@@ -189,7 +199,7 @@ public class Config {
 		for (Map<String, Object> v : valves) {
 			String className = (String) v.get(VALVE_CLASSNAME);
 			if (className == null) {
-				Runner.getLogger().warning("Missing className option in valve configuration");
+				Runner.getLogger().warn("Missing className option in valve configuration");
 				continue;
 			}
 
@@ -198,7 +208,7 @@ public class Config {
 			try {
 				valveClass = (Class<Valve>) Class.forName(className);
 			} catch (ClassNotFoundException e) {
-				Runner.getLogger().warning("Valve className '" + className + "' not found");
+				Runner.getLogger().warn("Valve className '" + className + "' not found");
 				continue;
 			}
 
@@ -206,7 +216,7 @@ public class Config {
 			try {
 				valveObject = valveClass.newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
-				Runner.getLogger().warning("Instantiation of class '" + className + "' failed: " + e.getMessage());
+				Runner.getLogger().warn("Instantiation of class '" + className + "' failed: " + e.getMessage());
 				continue;
 			}
 

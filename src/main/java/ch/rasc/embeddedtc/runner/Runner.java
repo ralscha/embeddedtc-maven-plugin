@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,6 +61,11 @@ import org.apache.catalina.deploy.ContextResource;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.juli.ClassLoaderLogManager;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.ExceptionUtils;
+import org.apache.tomcat.util.log.SystemLogHandler;
 import org.yaml.snakeyaml.Yaml;
 
 import ch.rasc.embeddedtc.runner.CheckConfig.CheckConfigOptions;
@@ -76,6 +82,8 @@ public class Runner {
 	public static final String EXTRA_RESOURCES_DIR = "extra";
 
 	private static Tomcat tomcat;
+
+	private static Thread shutdownHook;
 
 	/**
 	 * This method is called from the procrun service
@@ -134,6 +142,7 @@ public class Runner {
 
 	}
 
+	@SuppressWarnings("resource")
 	private static void startTc(StartOptions startOptions) throws URISyntaxException, IOException, Exception,
 			ServletException, LifecycleException {
 
@@ -321,7 +330,7 @@ public class Runner {
 			} catch (IOException e) {
 				String msg = "PORT " + connector.getPort() + " ALREADY IN USE";
 				System.err.println(msg);
-				getLogger().severe(msg);
+				getLogger().error(msg);
 				return;
 			}
 		}
@@ -474,7 +483,7 @@ public class Runner {
 						URL contextFileURL = contextFilePath.toUri().toURL();
 						ctx.setConfigFile(contextFileURL);
 					} catch (Exception e) {
-						getLogger().severe("Problem with the context file: " + e.getMessage());
+						getLogger().error("Problem with the context file: " + e.getMessage());
 					}
 				}
 			} else {
@@ -499,11 +508,26 @@ public class Runner {
 			}
 		}
 
+		System.setOut(new SystemLogHandler(System.out));
+		System.setErr(new SystemLogHandler(System.err));
+
 		tomcat.start();
 
 		// Disable session persistence support
 		for (Context ctx : contextsWithoutSessionPersistence) {
 			((StandardManager) ctx.getManager()).setPathname(null);
+		}
+
+		if (config.isUseShutdownHook()) {
+			if (shutdownHook == null) {
+				shutdownHook = new RunnerShutdownHook();
+			}
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
+			
+            LogManager logManager = LogManager.getLogManager();
+            if (logManager instanceof ClassLoaderLogManager) {
+                ((ClassLoaderLogManager) logManager).setUseShutdownHook(false);
+            }			
 		}
 
 		tomcat.getServer().await();
@@ -523,8 +547,8 @@ public class Runner {
 		return null;
 	}
 
-	public static Logger getLogger() {
-		return Logger.getLogger(Runner.class.getName());
+	public static Log getLogger() {
+		return LogFactory.getLog(Runner.class);
 	}
 
 	private static void copy(InputStream source, OutputStream sink) throws IOException {
@@ -532,6 +556,25 @@ public class Runner {
 		int n;
 		while ((n = source.read(buf)) > 0) {
 			sink.write(buf, 0, n);
+		}
+	}
+
+	private static class RunnerShutdownHook extends Thread {
+		@Override
+		public void run() {
+			try {
+				if (tomcat != null) {
+					tomcat.stop();
+				}
+			} catch (Throwable e) {
+				ExceptionUtils.handleThrowable(e);
+				getLogger().error("shutdownHook failed", e);
+			} finally {
+				LogManager logManager = LogManager.getLogManager();
+				if (logManager instanceof ClassLoaderLogManager) {
+					((ClassLoaderLogManager)logManager).shutdown();
+				}
+			}
 		}
 	}
 
