@@ -237,12 +237,13 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 				String[] runnerClasses = { "ch.rasc.embeddedtc.runner.CheckConfig$CheckConfigOptions",
 						"ch.rasc.embeddedtc.runner.CheckConfig", "ch.rasc.embeddedtc.runner.Config",
-						"ch.rasc.embeddedtc.runner.Context", "ch.rasc.embeddedtc.runner.DeleteDirectory",
+						"ch.rasc.embeddedtc.runner.Shutdown", "ch.rasc.embeddedtc.runner.Context",
+						"ch.rasc.embeddedtc.runner.DeleteDirectory",
 						"ch.rasc.embeddedtc.runner.ObfuscateUtil$ObfuscateOptions",
 						"ch.rasc.embeddedtc.runner.ObfuscateUtil", "ch.rasc.embeddedtc.runner.Runner$1",
 						"ch.rasc.embeddedtc.runner.Runner$2", "ch.rasc.embeddedtc.runner.Runner$StartOptions",
-						"ch.rasc.embeddedtc.runner.Runner$RunnerShutdownHook",
-						"ch.rasc.embeddedtc.runner.Runner" };
+						"ch.rasc.embeddedtc.runner.Runner$StopOptions",
+						"ch.rasc.embeddedtc.runner.Runner$RunnerShutdownHook", "ch.rasc.embeddedtc.runner.Runner" };
 
 				for (String rc : runnerClasses) {
 					String classAsPath = rc.replace('.', '/') + ".class";

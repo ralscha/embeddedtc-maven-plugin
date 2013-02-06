@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -104,7 +105,8 @@ public class Runner {
 		if (args.length == 0) {
 			arguments = new String[] { "start" };
 		} else {
-			if ("obfuscate".equals(args[0]) || "start".equals(args[0]) || "checkConfig".equals(args[0])) {
+			if ("obfuscate".equals(args[0]) || "start".equals(args[0]) || "stop".equals(args[0])
+					|| "checkConfig".equals(args[0])) {
 				arguments = args;
 			} else {
 				List<String> argumentsList = new ArrayList<>(Arrays.asList(args));
@@ -120,6 +122,9 @@ public class Runner {
 		StartOptions startOptions = new StartOptions();
 		commander.addCommand("start", startOptions);
 
+		StopOptions stopOptions = new StopOptions();
+		commander.addCommand("stop", stopOptions);
+
 		CheckConfigOptions checkConfigOptions = new CheckConfigOptions();
 		commander.addCommand("checkConfig", checkConfigOptions);
 
@@ -128,6 +133,9 @@ public class Runner {
 		switch (commander.getParsedCommand()) {
 		case "start":
 			startTc(startOptions);
+			break;
+		case "stop":
+			stopTc(stopOptions);
 			break;
 		case "obfuscate":
 			ObfuscateUtil.obfuscate(obfuscateOptions);
@@ -146,32 +154,8 @@ public class Runner {
 	private static void startTc(StartOptions startOptions) throws URISyntaxException, IOException, Exception,
 			ServletException, LifecycleException {
 
-		URL myJarLocationURL = Runner.class.getProtectionDomain().getCodeSource().getLocation();
-		Path myJar = Paths.get(myJarLocationURL.toURI());
-		Path myJarDir = myJar.getParent();
-
-		Path configFile;
-		String pathToConfigFile = startOptions.configFile != null && !startOptions.configFile.isEmpty() ? startOptions.configFile
-				.get(0) : null;
-
-		if (pathToConfigFile != null) {
-			configFile = Paths.get(pathToConfigFile);
-			if (!configFile.isAbsolute()) {
-				configFile = myJarDir.resolve(pathToConfigFile);
-			}
-		} else {
-			configFile = myJarDir.resolve("config.yaml");
-		}
-
-		final Config config;
-		if (Files.exists(configFile)) {
-			try (InputStream is = Files.newInputStream(configFile)) {
-				Yaml yaml = new Yaml();
-				config = yaml.loadAs(is, Config.class);
-			}
-		} else {
-			config = new Config();
-		}
+		final Config config = readConfig(startOptions.configFile != null && !startOptions.configFile.isEmpty() ? startOptions.configFile
+				.get(0) : null);
 
 		for (Map.Entry<String, Object> entry : config.getSystemProperties().entrySet()) {
 			String value = entry.getValue().toString();
@@ -182,7 +166,7 @@ public class Runner {
 		Path configuredPathToExtractDir = Paths.get(config.getExtractDirectory());
 		final Path extractDir;
 		if (!configuredPathToExtractDir.isAbsolute()) {
-			extractDir = myJarDir.resolve(configuredPathToExtractDir);
+			extractDir = config.getMyJarDirectory().resolve(configuredPathToExtractDir);
 		} else {
 			extractDir = configuredPathToExtractDir;
 		}
@@ -453,7 +437,7 @@ public class Runner {
 				if (externWarPath.isAbsolute()) {
 					warPath = configuredContext.getExternalWar();
 				} else {
-					warPath = myJarDir.resolve(configuredContext.getExternalWar()).toString();
+					warPath = config.getMyJarDirectory().resolve(configuredContext.getExternalWar()).toString();
 				}
 			} else {
 				// As a default, if no war is specified, take the first war
@@ -511,6 +495,12 @@ public class Runner {
 		System.setOut(new SystemLogHandler(System.out));
 		System.setErr(new SystemLogHandler(System.err));
 
+		boolean useShutdownPort = config.getShutdown() != null && config.getShutdown().getPort() != null;
+		if (useShutdownPort) {
+			tomcat.getServer().setPort(config.getShutdown().getPort());
+			tomcat.getServer().setShutdown(config.getShutdown().getCommand());
+		}
+
 		tomcat.start();
 
 		// Disable session persistence support
@@ -523,14 +513,69 @@ public class Runner {
 				shutdownHook = new RunnerShutdownHook();
 			}
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
-			
-            LogManager logManager = LogManager.getLogManager();
-            if (logManager instanceof ClassLoaderLogManager) {
-                ((ClassLoaderLogManager) logManager).setUseShutdownHook(false);
-            }			
+
+			LogManager logManager = LogManager.getLogManager();
+			if (logManager instanceof ClassLoaderLogManager) {
+				((ClassLoaderLogManager) logManager).setUseShutdownHook(false);
+			}
 		}
 
 		tomcat.getServer().await();
+
+		if (useShutdownPort) {
+			tomcat.stop();
+		}
+	}
+
+	private static void stopTc(StopOptions stopOptions) throws URISyntaxException, IOException {
+		Config config = readConfig(stopOptions.configFile != null && !stopOptions.configFile.isEmpty() ? stopOptions.configFile
+				.get(0) : null);
+		if (config.getShutdown() != null && config.getShutdown().getPort() != null) {
+
+			// send shutdown command
+			try (Socket socket = new Socket("localhost", config.getShutdown().getPort());
+					final OutputStream stream = socket.getOutputStream()) {
+
+				String command = config.getShutdown().getCommand();
+				for (int i = 0; i < command.length(); i++) {
+					stream.write(command.charAt(i));
+				}
+
+				stream.flush();
+			}
+
+		}
+	}
+
+	private static Config readConfig(String pathToConfigFile) throws URISyntaxException, IOException {
+		URL myJarLocationURL = Runner.class.getProtectionDomain().getCodeSource().getLocation();
+		Path myJar = Paths.get(myJarLocationURL.toURI());
+		Path myJarDir = myJar.getParent();
+
+		Path configFile;
+
+		if (pathToConfigFile != null) {
+			configFile = Paths.get(pathToConfigFile);
+			if (!configFile.isAbsolute()) {
+				configFile = myJarDir.resolve(pathToConfigFile);
+			}
+		} else {
+			configFile = myJarDir.resolve("config.yaml");
+		}
+
+		Config config;
+		if (Files.exists(configFile)) {
+			try (InputStream is = Files.newInputStream(configFile)) {
+				Yaml yaml = new Yaml();
+				config = yaml.loadAs(is, Config.class);
+			}
+		} else {
+			config = new Config();
+		}
+
+		config.setMyJarDirectory(myJarDir);
+
+		return config;
 	}
 
 	private static URL getContextXml(String warPath) throws IOException {
@@ -572,13 +617,13 @@ public class Runner {
 			} finally {
 				LogManager logManager = LogManager.getLogManager();
 				if (logManager instanceof ClassLoaderLogManager) {
-					((ClassLoaderLogManager)logManager).shutdown();
+					((ClassLoaderLogManager) logManager).shutdown();
 				}
 			}
 		}
 	}
 
-	@Parameters(commandDescription = "Starts the Tomcat")
+	@Parameters(commandDescription = "Starts Tomcat")
 	private static class StartOptions {
 		@Parameter(required = false, arity = 1, description = "absolutePathToConfigFile")
 		private List<String> configFile;
@@ -588,5 +633,11 @@ public class Runner {
 
 		@Parameter(names = { "-c", "--clean" }, description = "Force deletion of extraction directory at startup")
 		private boolean clean;
+	}
+
+	@Parameters(commandDescription = "Stops Tomcat")
+	private static class StopOptions {
+		@Parameter(required = false, arity = 1, description = "absolutePathToConfigFile")
+		private List<String> configFile;
 	}
 }

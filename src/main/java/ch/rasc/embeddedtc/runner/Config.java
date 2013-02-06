@@ -15,6 +15,7 @@
  */
 package ch.rasc.embeddedtc.runner;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,10 +32,12 @@ public class Config {
 
 	private String extractDirectory = "tc";
 
+	private Shutdown shutdown;
+
 	private boolean silent = false;
-	
+
 	private boolean useShutdownHook = false;
-	
+
 	private String jvmRoute;
 
 	private List<Map<String, Object>> valves = Collections.emptyList();
@@ -52,6 +55,8 @@ public class Config {
 	private Context context;
 
 	private List<Context> contexts = Collections.emptyList();
+
+	private Path myJarDirectory;
 
 	public String getJvmRoute() {
 		return jvmRoute;
@@ -136,6 +141,22 @@ public class Config {
 
 	public void setExtractDirectory(String extractDirectory) {
 		this.extractDirectory = extractDirectory;
+	}
+
+	public Shutdown getShutdown() {
+		return shutdown;
+	}
+
+	public void setShutdown(Shutdown shutdown) {
+		this.shutdown = shutdown;
+	}
+
+	public Path getMyJarDirectory() {
+		return myJarDirectory;
+	}
+
+	public void setMyJarDirectory(Path myJarDirectory) {
+		this.myJarDirectory = myJarDirectory;
 	}
 
 	private static final String CONNECTOR_PROTOCOL = "protocol";
