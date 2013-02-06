@@ -184,7 +184,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 				if (includeJSPSupport) {
 					includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-jasper");
-					includeArtifacts.add("ecj:ecj");
+					includeArtifacts.add("org.eclipse.jdt.core.compiler:ecj");
 				}
 
 				for (Artifact pluginArtifact : pluginArtifacts) {
