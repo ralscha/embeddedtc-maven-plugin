@@ -50,6 +50,7 @@ import org.codehaus.plexus.archiver.jar.ManifestException;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.resolution.ArtifactRequest;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
@@ -66,7 +67,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 	@Component
 	private RepositorySystem repoSystem;
 
-	@Parameter(defaultValue = "${repositorySystemSession}")
+	@Parameter(defaultValue = "${repositorySystemSession}", required = true, readonly = true)
 	private RepositorySystemSession repoSession;
 
 	@Parameter(defaultValue = "${plugin.artifacts}", required = true)
@@ -77,6 +78,9 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${project.artifactId}-${project.version}-embeddedtc.jar", required = true)
 	private String finalName;
+
+	@Parameter(defaultValue = "${project.remoteProjectRepositories}", readonly = true, required = true)
+	private List<RemoteRepository> projectRepos;
 
 	@Parameter(required = false)
 	private String includeTcNativeWin32;
@@ -126,7 +130,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 						ArtifactRequest request = new ArtifactRequest();
 						request.setArtifact(new DefaultArtifact(extraWarDependency.getGroupId(), extraWarDependency
 								.getArtifactId(), extraWarDependency.getType(), extraWarDependency.getVersion()));
-
+						request.setRepositories(projectRepos);
 						ArtifactResult result;
 						try {
 							result = repoSystem.resolveArtifact(repoSession, request);
@@ -202,7 +206,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 						ArtifactRequest request = new ArtifactRequest();
 						request.setArtifact(new DefaultArtifact(dependency.getGroupId(), dependency.getArtifactId(),
 								dependency.getType(), dependency.getVersion()));
-
+						request.setRepositories(projectRepos);
 						ArtifactResult result;
 						try {
 							result = repoSystem.resolveArtifact(repoSession, request);
