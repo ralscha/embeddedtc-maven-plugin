@@ -177,6 +177,9 @@ public class Config {
 		}
 
 		for (Map<String, Object> con : connectors) {
+			
+			replaceVariables(con);
+			
 			Object protocol = con.get(CONNECTOR_PROTOCOL);
 			if (protocol == null) {
 				protocol = "HTTP/1.1";
@@ -201,6 +204,25 @@ public class Config {
 		}
 
 		return conObjects;
+	}
+
+	private static void replaceVariables(Map<String, Object> con) {
+		for (Map.Entry<String,Object> entry : con.entrySet()) {
+			String value = entry.getValue().toString().trim();
+			if (value.startsWith("${") && value.endsWith("}")) {
+				String var = value.substring(2, value.length()-1);
+				String systemProperty = System.getProperty(var);
+				if (systemProperty != null) {
+					entry.setValue(systemProperty);
+				} else {
+					String environmentVariable = System.getenv(var);
+					if (environmentVariable != null) {
+						entry.setValue(environmentVariable);
+					}
+				}
+			}
+		}
+		
 	}
 
 	private static final String VALVE_CLASSNAME = "className";
