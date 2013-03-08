@@ -205,7 +205,6 @@ public class Config {
 
 	private static final String VALVE_CLASSNAME = "className";
 
-	@SuppressWarnings("unchecked")
 	public List<Valve> createValveObjects() {
 		List<Valve> valveObjects = new ArrayList<>();
 
