@@ -48,7 +48,7 @@
 	</scm>
 
 	<properties>
-		<tomcat.version>7.0.37</tomcat.version>
+		<tomcat.version>7.0.39</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.debug>true</maven.compiler.debug>
 	</properties>
@@ -76,7 +76,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.4.1</version>
+			<version>1.5</version>
 		</dependency>
 
 		<dependency>
