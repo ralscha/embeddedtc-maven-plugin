@@ -253,9 +253,6 @@ public class Runner {
 					try (InputStream is = Runner.class.getResourceAsStream("/" + extra)) {
 						Files.copy(is, extraFile);
 					}
-
-					System.setProperty("EXTRA_RESOURCES_DIR", extractDir.resolve(EXTRA_RESOURCES_DIR).toAbsolutePath()
-							.toString());
 				}
 			}
 
@@ -280,6 +277,11 @@ public class Runner {
 				}
 			}
 
+		}
+
+		Path extraDir = extractDir.resolve(EXTRA_RESOURCES_DIR);
+		if (Files.exists(extraDir)) {
+			System.setProperty("EXTRA_RESOURCES_DIR", extraDir.toAbsolutePath().toString());
 		}
 
 		if (isWin) {
