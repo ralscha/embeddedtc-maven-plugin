@@ -1,5 +1,7 @@
 # embeddedtc-maven-plugin
 
+[![Build Status](https://api.travis-ci.org/ralscha/embeddedtc-maven-plugin.png)](http://travis-ci.org/ralscha/embeddedtc-maven-plugin)
+
 **embeddedtc-maven-plugin** is a [Maven](http://maven.apache.org/) plugin that bundles one or multiple war files and a [Apache Tomcat 7](http://tomcat.apache.org/) into one _executable_ jar.
 On the target machine a simple `java -jar myproject.jar` starts Tomcat and deploys the included war file. 
 
