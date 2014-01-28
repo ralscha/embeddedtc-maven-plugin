@@ -329,12 +329,8 @@ public class Runner {
 				String base = "org.apache.catalina.core.ContainerBase.[default].[";
 				if (host == null) {
 					base += getHost().getName();
-					getHost().setAutoDeploy(false);
-					getHost().setDeployOnStartup(false);
 				} else {
 					base += host.getName();
-					host.setAutoDeploy(false);
-					host.setDeployOnStartup(false);
 				}
 				base += "].[";
 				base += url;
