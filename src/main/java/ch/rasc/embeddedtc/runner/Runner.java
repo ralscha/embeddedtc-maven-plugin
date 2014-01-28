@@ -368,7 +368,8 @@ public class Runner {
 		}
 
 		// Create all server objects;
-		tomcat.getHost();
+		tomcat.getHost().setAutoDeploy(false);
+		tomcat.getHost().setDeployOnStartup(false);
 
 		// Install the listeners
 		for (String listenerClassName : config.getListeners()) {
