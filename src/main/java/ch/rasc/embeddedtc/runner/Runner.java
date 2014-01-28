@@ -210,6 +210,7 @@ public class Runner {
 			Files.createDirectories(extractDir);
 			Files.createDirectory(tempDir);
 			Files.createDirectory(loggingDir);
+			Files.createDirectory(extractDir.resolve("webapps"));
 
 			CodeSource src = Runner.class.getProtectionDomain().getCodeSource();
 			List<String> warList = new ArrayList<>();
