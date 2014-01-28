@@ -329,8 +329,12 @@ public class Runner {
 				String base = "org.apache.catalina.core.ContainerBase.[default].[";
 				if (host == null) {
 					base += getHost().getName();
+					getHost().setAutoDeploy(false);
+					getHost().setDeployOnStartup(false);
 				} else {
 					base += host.getName();
+					host.setAutoDeploy(false);
+					host.setDeployOnStartup(false);
 				}
 				base += "].[";
 				base += url;
@@ -369,8 +373,7 @@ public class Runner {
 		}
 
 		// Create all server objects;
-		tomcat.getHost().setAutoDeploy(false);
-		tomcat.getHost().setDeployOnStartup(false);
+		tomcat.getHost();
 
 		// Install the listeners
 		for (String listenerClassName : config.getListeners()) {
