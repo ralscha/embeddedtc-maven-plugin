@@ -182,6 +182,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 				Set<String> includeArtifacts = new HashSet<>();
 				includeArtifacts.add("org.apache.tomcat:tomcat-jdbc");
 				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-core");
+				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-websocket");
 				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-logging-juli");
 				includeArtifacts.add("org.yaml:snakeyaml");
 				includeArtifacts.add("com.beust:jcommander");
