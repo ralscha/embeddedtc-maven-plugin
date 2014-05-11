@@ -129,8 +129,8 @@ public class ObfuscateUtil {
 		for (int i = 0; i < s.length(); i += 4) {
 			String x = s.substring(i, i + 4);
 			int i0 = Integer.parseInt(x, 36);
-			int i1 = (i0 / 256);
-			int i2 = (i0 % 256);
+			int i1 = i0 / 256;
+			int i2 = i0 % 256;
 			b[l++] = (byte) ((i1 + i2 - 254) / 2);
 		}
 
