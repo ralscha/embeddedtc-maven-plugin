@@ -96,7 +96,8 @@ public class Runner {
 	/**
 	 * This method is called from the procrun service
 	 */
-	public static void stop(@SuppressWarnings("unused") String... args) throws LifecycleException {
+	public static void stop(@SuppressWarnings("unused") String... args)
+			throws LifecycleException {
 		tomcat.stop();
 	}
 
@@ -104,14 +105,18 @@ public class Runner {
 		String[] arguments;
 		if (args.length == 0) {
 			arguments = new String[] { "start" };
-		} else {
-			if ("obfuscate".equals(args[0]) || "start".equals(args[0]) || "stop".equals(args[0])
-					|| "checkConfig".equals(args[0])) {
+		}
+		else {
+			if ("obfuscate".equals(args[0]) || "start".equals(args[0])
+					|| "stop".equals(args[0]) || "checkConfig".equals(args[0])) {
 				arguments = args;
-			} else {
-				List<String> argumentsList = new ArrayList<>(Arrays.asList(args));
+			}
+			else {
+				List<String> argumentsList = new ArrayList<>(
+						Arrays.asList(args));
 				argumentsList.add(0, "start");
-				arguments = argumentsList.toArray(new String[argumentsList.size()]);
+				arguments = argumentsList.toArray(new String[argumentsList
+						.size()]);
 			}
 		}
 
@@ -151,23 +156,29 @@ public class Runner {
 	}
 
 	@SuppressWarnings("resource")
-	private static void startTc(StartOptions startOptions) throws URISyntaxException, IOException, Exception,
+	private static void startTc(StartOptions startOptions)
+			throws URISyntaxException, IOException, Exception,
 			ServletException, LifecycleException {
 
-		final Config config = readConfig(startOptions.configFile != null && !startOptions.configFile.isEmpty() ? startOptions.configFile
+		final Config config = readConfig(startOptions.configFile != null
+				&& !startOptions.configFile.isEmpty() ? startOptions.configFile
 				.get(0) : null);
 
-		for (Map.Entry<String, Object> entry : config.getSystemProperties().entrySet()) {
+		for (Map.Entry<String, Object> entry : config.getSystemProperties()
+				.entrySet()) {
 			String value = entry.getValue().toString();
 			value = ObfuscateUtil.toPlaintext(value, startOptions.password);
 			System.setProperty(entry.getKey(), value);
 		}
 
-		Path configuredPathToExtractDir = Paths.get(config.getExtractDirectory());
+		Path configuredPathToExtractDir = Paths.get(config
+				.getExtractDirectory());
 		final Path extractDir;
 		if (!configuredPathToExtractDir.isAbsolute()) {
-			extractDir = config.getMyJarDirectory().resolve(configuredPathToExtractDir);
-		} else {
+			extractDir = config.getMyJarDirectory().resolve(
+					configuredPathToExtractDir);
+		}
+		else {
 			extractDir = configuredPathToExtractDir;
 		}
 
@@ -176,15 +187,19 @@ public class Runner {
 		if (Files.exists(extractDir) && !startOptions.clean) {
 			Path timestampFile = extractDir.resolve(TIMESTAMP_FILENAME);
 			if (Files.exists(timestampFile)) {
-				byte[] extractTimestampBytes = Files.readAllBytes(timestampFile);
-				String extractTimestamp = new String(extractTimestampBytes, StandardCharsets.UTF_8);
+				byte[] extractTimestampBytes = Files
+						.readAllBytes(timestampFile);
+				String extractTimestamp = new String(extractTimestampBytes,
+						StandardCharsets.UTF_8);
 
 				String timestamp = null;
-				try (InputStream is = Runner.class.getResourceAsStream("/" + TIMESTAMP_FILENAME);
+				try (InputStream is = Runner.class.getResourceAsStream("/"
+						+ TIMESTAMP_FILENAME);
 						ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
 					copy(is, bos);
-					timestamp = new String(bos.toByteArray(), StandardCharsets.UTF_8);
+					timestamp = new String(bos.toByteArray(),
+							StandardCharsets.UTF_8);
 				}
 
 				if (Long.valueOf(timestamp) <= Long.valueOf(extractTimestamp)) {
@@ -194,7 +209,8 @@ public class Runner {
 			}
 		}
 
-		boolean isWin = System.getProperty("os.name").toLowerCase().contains("win");
+		boolean isWin = System.getProperty("os.name").toLowerCase()
+				.contains("win");
 
 		Path loggingPropertyFile = extractDir.resolve("logging.properties");
 		Path loggingDir = extractDir.resolve("logs");
@@ -226,7 +242,8 @@ public class Runner {
 					String entryName = ze.getName();
 					if (entryName.startsWith(extraDirName)) {
 						extraList.add(entryName);
-					} else if (entryName.endsWith(".war")) {
+					}
+					else if (entryName.endsWith(".war")) {
 						warList.add(entryName);
 					}
 				}
@@ -234,16 +251,19 @@ public class Runner {
 
 			for (String war : warList) {
 				Path warFile = extractDir.resolve(war);
-				try (InputStream is = Runner.class.getResourceAsStream("/" + war)) {
+				try (InputStream is = Runner.class.getResourceAsStream("/"
+						+ war)) {
 					Files.copy(is, warFile);
 				}
 			}
 
-			try (InputStream is = Runner.class.getResourceAsStream("/conf/web.xml")) {
+			try (InputStream is = Runner.class
+					.getResourceAsStream("/conf/web.xml")) {
 				Files.copy(is, defaultWebxmlFile);
 			}
 
-			try (InputStream is = Runner.class.getResourceAsStream("/conf/logging.properties")) {
+			try (InputStream is = Runner.class
+					.getResourceAsStream("/conf/logging.properties")) {
 				Files.copy(is, loggingPropertyFile);
 			}
 
@@ -251,26 +271,31 @@ public class Runner {
 				for (String extra : extraList) {
 					Path extraFile = extractDir.resolve(extra);
 					Files.createDirectories(extraFile.getParent());
-					try (InputStream is = Runner.class.getResourceAsStream("/" + extra)) {
+					try (InputStream is = Runner.class.getResourceAsStream("/"
+							+ extra)) {
 						Files.copy(is, extraFile);
 					}
 				}
 			}
 
 			Path timestampFile = extractDir.resolve(TIMESTAMP_FILENAME);
-			try (InputStream is = Runner.class.getResourceAsStream("/" + TIMESTAMP_FILENAME)) {
+			try (InputStream is = Runner.class.getResourceAsStream("/"
+					+ TIMESTAMP_FILENAME)) {
 				Files.copy(is, timestampFile);
 			}
 
 			if (isWin) {
 				if (System.getProperty("os.arch").contains("64")) {
-					try (InputStream is = Runner.class.getResourceAsStream("/tcnative-1.dll.64")) {
+					try (InputStream is = Runner.class
+							.getResourceAsStream("/tcnative-1.dll.64")) {
 						if (is != null) {
 							Files.copy(is, extractDir.resolve("tcnative-1.dll"));
 						}
 					}
-				} else {
-					try (InputStream is = Runner.class.getResourceAsStream("/tcnative-1.dll.32")) {
+				}
+				else {
+					try (InputStream is = Runner.class
+							.getResourceAsStream("/tcnative-1.dll.32")) {
 						if (is != null) {
 							Files.copy(is, extractDir.resolve("tcnative-1.dll"));
 						}
@@ -282,7 +307,8 @@ public class Runner {
 
 		Path extraDir = extractDir.resolve(EXTRA_RESOURCES_DIR);
 		if (Files.exists(extraDir)) {
-			System.setProperty("EXTRA_RESOURCES_DIR", extraDir.toAbsolutePath().toString());
+			System.setProperty("EXTRA_RESOURCES_DIR", extraDir.toAbsolutePath()
+					.toString());
 		}
 
 		if (isWin) {
@@ -290,23 +316,29 @@ public class Runner {
 			libraryPath = extractDir.toString() + ";" + libraryPath;
 			System.setProperty("java.library.path", libraryPath);
 
-			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+			Field fieldSysPath = ClassLoader.class
+					.getDeclaredField("sys_paths");
 			fieldSysPath.setAccessible(true);
 			fieldSysPath.set(null, null);
 		}
 
 		List<String> absolutePathsToEmbeddedWars = new ArrayList<>();
 
-		try (DirectoryStream<Path> wars = Files.newDirectoryStream(extractDir, "*.war")) {
+		try (DirectoryStream<Path> wars = Files.newDirectoryStream(extractDir,
+				"*.war")) {
 			for (Path war : wars) {
-				absolutePathsToEmbeddedWars.add(war.toAbsolutePath().toString());
+				absolutePathsToEmbeddedWars
+						.add(war.toAbsolutePath().toString());
 			}
 		}
 
-		System.setProperty("java.io.tmpdir", tempDir.toAbsolutePath().toString());
+		System.setProperty("java.io.tmpdir", tempDir.toAbsolutePath()
+				.toString());
 		System.setProperty("log.dir", loggingDir.toAbsolutePath().toString());
-		System.setProperty("java.util.logging.config.file", loggingPropertyFile.toAbsolutePath().toString());
-		System.setProperty("java.util.logging.manager", "org.apache.juli.ClassLoaderLogManager");
+		System.setProperty("java.util.logging.config.file", loggingPropertyFile
+				.toAbsolutePath().toString());
+		System.setProperty("java.util.logging.manager",
+				"org.apache.juli.ClassLoaderLogManager");
 
 		List<Connector> connectors = config.createConnectorObjects();
 		for (Connector connector : connectors) {
@@ -314,7 +346,8 @@ public class Runner {
 				try (ServerSocket srv = new ServerSocket(connector.getPort())) {
 					// nothing here
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				String msg = "PORT " + connector.getPort() + " ALREADY IN USE";
 				System.err.println(msg);
 				getLogger().error(msg);
@@ -325,11 +358,13 @@ public class Runner {
 		tomcat = new Tomcat() {
 
 			@Override
-			public Context addWebapp(@SuppressWarnings("hiding") Host host, String url, String name, String path) {
+			public Context addWebapp(@SuppressWarnings("hiding") Host host,
+					String url, String name, String path) {
 				String base = "org.apache.catalina.core.ContainerBase.[default].[";
 				if (host == null) {
 					base += getHost().getName();
-				} else {
+				}
+				else {
 					base += host.getName();
 				}
 				base += "].[";
@@ -337,7 +372,8 @@ public class Runner {
 				base += "]";
 				if (config.isSilent()) {
 					Logger.getLogger(base).setLevel(Level.WARNING);
-				} else {
+				}
+				else {
 					Logger.getLogger(base).setLevel(Level.INFO);
 				}
 
@@ -348,7 +384,8 @@ public class Runner {
 
 				ContextConfig ctxCfg = new ContextConfig();
 				ctx.addLifecycleListener(ctxCfg);
-				ctxCfg.setDefaultWebXml(defaultWebxmlFile.toAbsolutePath().toString());
+				ctxCfg.setDefaultWebXml(defaultWebxmlFile.toAbsolutePath()
+						.toString());
 				getHost().addChild(ctx);
 
 				return ctx;
@@ -359,11 +396,14 @@ public class Runner {
 		tomcat.setBaseDir(extractDir.toAbsolutePath().toString());
 		tomcat.setSilent(config.isSilent());
 
-		for (String s : new String[] { "org.apache.coyote.http11.Http11NioProtocol",
-				"org.apache.tomcat.util.net.NioSelectorPool", Runner.class.getName() }) {
+		for (String s : new String[] {
+				"org.apache.coyote.http11.Http11NioProtocol",
+				"org.apache.tomcat.util.net.NioSelectorPool",
+				Runner.class.getName() }) {
 			if (config.isSilent()) {
 				Logger.getLogger(s).setLevel(Level.WARNING);
-			} else {
+			}
+			else {
 				Logger.getLogger(s).setLevel(Level.INFO);
 			}
 		}
@@ -373,7 +413,8 @@ public class Runner {
 
 		// Install the listeners
 		for (String listenerClassName : config.getListeners()) {
-			Class<LifecycleListener> listener = (Class<LifecycleListener>) Class.forName(listenerClassName);
+			Class<LifecycleListener> listener = (Class<LifecycleListener>) Class
+					.forName(listenerClassName);
 			tomcat.getServer().addLifecycleListener(listener.newInstance());
 		}
 
@@ -403,7 +444,8 @@ public class Runner {
 		}
 
 		List<Context> contextsWithoutSessionPersistence = new ArrayList<>();
-		for (ch.rasc.embeddedtc.runner.Context configuredContext : config.getContexts()) {
+		for (ch.rasc.embeddedtc.runner.Context configuredContext : config
+				.getContexts()) {
 			configuredContext.decryptPasswords(startOptions.password);
 
 			String contextPath = configuredContext.getContextPath();
@@ -416,7 +458,8 @@ public class Runner {
 			if (configuredContext.getEmbeddedWar() != null) {
 				if (configuredContext.getEmbeddedWar().contains("*")) {
 					String regex = ".*?"
-							+ configuredContext.getEmbeddedWar().replace("\\", "\\\\").replace(".", "\\.")
+							+ configuredContext.getEmbeddedWar()
+									.replace("\\", "\\\\").replace(".", "\\.")
 									.replace("*", ".*?") + "$";
 					Pattern pattern = Pattern.compile(regex);
 
@@ -427,21 +470,28 @@ public class Runner {
 							break;
 						}
 					}
-				} else {
+				}
+				else {
 					warPath = configuredContext.getEmbeddedWar();
 				}
 
 				if (warPath == null) {
 					warPath = absolutePathsToEmbeddedWars.iterator().next();
 				}
-			} else if (configuredContext.getExternalWar() != null) {
-				Path externWarPath = Paths.get(configuredContext.getExternalWar());
+			}
+			else if (configuredContext.getExternalWar() != null) {
+				Path externWarPath = Paths.get(configuredContext
+						.getExternalWar());
 				if (externWarPath.isAbsolute()) {
 					warPath = configuredContext.getExternalWar();
-				} else {
-					warPath = config.getMyJarDirectory().resolve(configuredContext.getExternalWar()).toString();
 				}
-			} else {
+				else {
+					warPath = config.getMyJarDirectory()
+							.resolve(configuredContext.getExternalWar())
+							.toString();
+				}
+			}
+			else {
 				// As a default, if no war is specified, take the first war
 				// that's embedded in our jar
 				warPath = absolutePathsToEmbeddedWars.iterator().next();
@@ -454,7 +504,8 @@ public class Runner {
 				ctx.getNamingResources().addEnvironment(env);
 			}
 
-			for (ContextResource res : configuredContext.createContextResourceObjects()) {
+			for (ContextResource res : configuredContext
+					.createContextResourceObjects()) {
 				ctx.getNamingResources().addResource(res);
 			}
 
@@ -463,16 +514,21 @@ public class Runner {
 			}
 
 			if (configuredContext.getContextFile() != null) {
-				Path contextFilePath = Paths.get(configuredContext.getContextFile());
+				Path contextFilePath = Paths.get(configuredContext
+						.getContextFile());
 				if (Files.exists(contextFilePath)) {
 					try {
 						URL contextFileURL = contextFilePath.toUri().toURL();
 						ctx.setConfigFile(contextFileURL);
-					} catch (Exception e) {
-						getLogger().error("Problem with the context file: " + e.getMessage());
+					}
+					catch (Exception e) {
+						getLogger().error(
+								"Problem with the context file: "
+										+ e.getMessage());
 					}
 				}
-			} else {
+			}
+			else {
 				URL contextFileURL = getContextXml(warPath);
 				if (contextFileURL != null) {
 					ctx.setConfigFile(contextFileURL);
@@ -497,7 +553,8 @@ public class Runner {
 		System.setOut(new SystemLogHandler(System.out));
 		System.setErr(new SystemLogHandler(System.err));
 
-		boolean useShutdownPort = config.getShutdown() != null && config.getShutdown().getPort() != null;
+		boolean useShutdownPort = config.getShutdown() != null
+				&& config.getShutdown().getPort() != null;
 		if (useShutdownPort) {
 			tomcat.getServer().setPort(config.getShutdown().getPort());
 			tomcat.getServer().setShutdown(config.getShutdown().getCommand());
@@ -529,13 +586,17 @@ public class Runner {
 		}
 	}
 
-	private static void stopTc(StopOptions stopOptions) throws URISyntaxException, IOException {
-		Config config = readConfig(stopOptions.configFile != null && !stopOptions.configFile.isEmpty() ? stopOptions.configFile
+	private static void stopTc(StopOptions stopOptions)
+			throws URISyntaxException, IOException {
+		Config config = readConfig(stopOptions.configFile != null
+				&& !stopOptions.configFile.isEmpty() ? stopOptions.configFile
 				.get(0) : null);
-		if (config.getShutdown() != null && config.getShutdown().getPort() != null) {
+		if (config.getShutdown() != null
+				&& config.getShutdown().getPort() != null) {
 
 			// send shutdown command
-			try (Socket socket = new Socket("localhost", config.getShutdown().getPort());
+			try (Socket socket = new Socket("localhost", config.getShutdown()
+					.getPort());
 					final OutputStream stream = socket.getOutputStream()) {
 
 				String command = config.getShutdown().getCommand();
@@ -549,8 +610,10 @@ public class Runner {
 		}
 	}
 
-	private static Config readConfig(String pathToConfigFile) throws URISyntaxException, IOException {
-		URL myJarLocationURL = Runner.class.getProtectionDomain().getCodeSource().getLocation();
+	private static Config readConfig(String pathToConfigFile)
+			throws URISyntaxException, IOException {
+		URL myJarLocationURL = Runner.class.getProtectionDomain()
+				.getCodeSource().getLocation();
 		Path myJar = Paths.get(myJarLocationURL.toURI());
 		Path myJarDir = myJar.getParent();
 
@@ -561,7 +624,8 @@ public class Runner {
 			if (!configFile.isAbsolute()) {
 				configFile = myJarDir.resolve(pathToConfigFile);
 			}
-		} else {
+		}
+		else {
 			configFile = myJarDir.resolve("config.yaml");
 		}
 
@@ -571,7 +635,8 @@ public class Runner {
 				Yaml yaml = new Yaml();
 				config = yaml.loadAs(is, Config.class);
 			}
-		} else {
+		}
+		else {
 			config = new Config();
 		}
 
@@ -587,7 +652,8 @@ public class Runner {
 			if (is != null) {
 				return url;
 			}
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			// ignore this exception
 		}
 
@@ -598,7 +664,8 @@ public class Runner {
 		return LogFactory.getLog(Runner.class);
 	}
 
-	private static void copy(InputStream source, OutputStream sink) throws IOException {
+	private static void copy(InputStream source, OutputStream sink)
+			throws IOException {
 		byte[] buf = new byte[8192];
 		int n;
 		while ((n = source.read(buf)) > 0) {
@@ -613,10 +680,12 @@ public class Runner {
 				if (tomcat != null) {
 					tomcat.stop();
 				}
-			} catch (Throwable e) {
+			}
+			catch (Throwable e) {
 				ExceptionUtils.handleThrowable(e);
 				getLogger().error("shutdownHook failed", e);
-			} finally {
+			}
+			finally {
 				LogManager logManager = LogManager.getLogManager();
 				if (logManager instanceof ClassLoaderLogManager) {
 					((ClassLoaderLogManager) logManager).shutdown();

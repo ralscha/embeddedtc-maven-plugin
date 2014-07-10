@@ -44,7 +44,8 @@ public class Config {
 
 	private Map<String, Object> valve;
 
-	private Set<String> listeners = new HashSet<>(Arrays.asList("org.apache.catalina.core.AprLifecycleListener"));
+	private Set<String> listeners = new HashSet<>(
+			Arrays.asList("org.apache.catalina.core.AprLifecycleListener"));
 
 	private Map<String, Object> systemProperties = Collections.emptyMap();
 
@@ -171,7 +172,8 @@ public class Config {
 		if (connector != null) {
 			if (connectors.isEmpty()) {
 				setConnectors(Collections.singletonList(connector));
-			} else {
+			}
+			else {
 				connectors.add(connector);
 			}
 		}
@@ -196,7 +198,8 @@ public class Config {
 
 			for (Map.Entry<String, Object> entry : con.entrySet()) {
 				if (!entry.getKey().equals(CONNECTOR_PROTOCOL)) {
-					IntrospectionUtils.setProperty(tcConnector, entry.getKey(), entry.getValue().toString());
+					IntrospectionUtils.setProperty(tcConnector, entry.getKey(),
+							entry.getValue().toString());
 				}
 			}
 
@@ -214,7 +217,8 @@ public class Config {
 				String systemProperty = System.getProperty(var);
 				if (systemProperty != null) {
 					entry.setValue(systemProperty);
-				} else {
+				}
+				else {
 					String environmentVariable = System.getenv(var);
 					if (environmentVariable != null) {
 						entry.setValue(environmentVariable);
@@ -233,7 +237,8 @@ public class Config {
 		if (valve != null) {
 			if (valves.isEmpty()) {
 				setValves(Collections.singletonList(valve));
-			} else {
+			}
+			else {
 				valves.add(valve);
 			}
 		}
@@ -241,7 +246,8 @@ public class Config {
 		for (Map<String, Object> v : valves) {
 			String className = (String) v.get(VALVE_CLASSNAME);
 			if (className == null) {
-				Runner.getLogger().warn("Missing className option in valve configuration");
+				Runner.getLogger().warn(
+						"Missing className option in valve configuration");
 				continue;
 			}
 
@@ -249,22 +255,28 @@ public class Config {
 
 			try {
 				valveClass = (Class<Valve>) Class.forName(className);
-			} catch (ClassNotFoundException e) {
-				Runner.getLogger().warn("Valve className '" + className + "' not found");
+			}
+			catch (ClassNotFoundException e) {
+				Runner.getLogger().warn(
+						"Valve className '" + className + "' not found");
 				continue;
 			}
 
 			Valve valveObject;
 			try {
 				valveObject = valveClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
-				Runner.getLogger().warn("Instantiation of class '" + className + "' failed: " + e.getMessage());
+			}
+			catch (InstantiationException | IllegalAccessException e) {
+				Runner.getLogger().warn(
+						"Instantiation of class '" + className + "' failed: "
+								+ e.getMessage());
 				continue;
 			}
 
 			for (Map.Entry<String, Object> entry : v.entrySet()) {
 				if (!entry.getKey().equals(VALVE_CLASSNAME)) {
-					IntrospectionUtils.setProperty(valveObject, entry.getKey(), entry.getValue().toString());
+					IntrospectionUtils.setProperty(valveObject, entry.getKey(),
+							entry.getValue().toString());
 				}
 			}
 
@@ -276,7 +288,8 @@ public class Config {
 
 	public boolean isEnableNaming() {
 		for (Context ctx : getContexts()) {
-			if (ctx.hasEnvironmentsOrResources() || ctx.getContextFile() != null) {
+			if (ctx.hasEnvironmentsOrResources()
+					|| ctx.getContextFile() != null) {
 				return true;
 			}
 		}
@@ -286,9 +299,10 @@ public class Config {
 
 	@Override
 	public String toString() {
-		return "Config [jvmRoute=" + jvmRoute + ", silent=" + silent + ", listeners=" + listeners
-				+ ", systemProperties=" + systemProperties + ", connectors=" + connectors + ", context=" + context
-				+ ", contexts=" + contexts + "]";
+		return "Config [jvmRoute=" + jvmRoute + ", silent=" + silent
+				+ ", listeners=" + listeners + ", systemProperties="
+				+ systemProperties + ", connectors=" + connectors
+				+ ", context=" + context + ", contexts=" + contexts + "]";
 	}
 
 }

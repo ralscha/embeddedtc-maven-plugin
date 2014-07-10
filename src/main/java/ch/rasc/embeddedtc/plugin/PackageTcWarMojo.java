@@ -109,15 +109,19 @@ public class PackageTcWarMojo extends AbstractMojo {
 			Files.createDirectories(warExecFile.getParent());
 
 			try (OutputStream os = Files.newOutputStream(warExecFile);
-					ArchiveOutputStream aos = new ArchiveStreamFactory().createArchiveOutputStream(
-							ArchiveStreamFactory.JAR, os)) {
+					ArchiveOutputStream aos = new ArchiveStreamFactory()
+							.createArchiveOutputStream(
+									ArchiveStreamFactory.JAR, os)) {
 
 				// If project is a war project add the war to the project
 				if ("war".equalsIgnoreCase(project.getPackaging())) {
 					File projectArtifact = project.getArtifact().getFile();
-					if (projectArtifact != null && Files.exists(projectArtifact.toPath())) {
-						aos.putArchiveEntry(new JarArchiveEntry(projectArtifact.getName()));
-						try (InputStream is = Files.newInputStream(projectArtifact.toPath())) {
+					if (projectArtifact != null
+							&& Files.exists(projectArtifact.toPath())) {
+						aos.putArchiveEntry(new JarArchiveEntry(projectArtifact
+								.getName()));
+						try (InputStream is = Files
+								.newInputStream(projectArtifact.toPath())) {
 							IOUtils.copy(is, aos);
 						}
 						aos.closeArchiveEntry();
@@ -128,19 +132,26 @@ public class PackageTcWarMojo extends AbstractMojo {
 				if (extraWars != null) {
 					for (Dependency extraWarDependency : extraWars) {
 						ArtifactRequest request = new ArtifactRequest();
-						request.setArtifact(new DefaultArtifact(extraWarDependency.getGroupId(), extraWarDependency
-								.getArtifactId(), extraWarDependency.getType(), extraWarDependency.getVersion()));
+						request.setArtifact(new DefaultArtifact(
+								extraWarDependency.getGroupId(),
+								extraWarDependency.getArtifactId(),
+								extraWarDependency.getType(),
+								extraWarDependency.getVersion()));
 						request.setRepositories(projectRepos);
 						ArtifactResult result;
 						try {
-							result = repoSystem.resolveArtifact(repoSession, request);
-						} catch (ArtifactResolutionException e) {
+							result = repoSystem.resolveArtifact(repoSession,
+									request);
+						}
+						catch (ArtifactResolutionException e) {
 							throw new MojoExecutionException(e.getMessage(), e);
 						}
 
 						File extraWarFile = result.getArtifact().getFile();
-						aos.putArchiveEntry(new JarArchiveEntry(extraWarFile.getName()));
-						try (InputStream is = Files.newInputStream(extraWarFile.toPath())) {
+						aos.putArchiveEntry(new JarArchiveEntry(extraWarFile
+								.getName()));
+						try (InputStream is = Files.newInputStream(extraWarFile
+								.toPath())) {
 							IOUtils.copy(is, aos);
 						}
 						aos.closeArchiveEntry();
@@ -152,25 +163,36 @@ public class PackageTcWarMojo extends AbstractMojo {
 				if (extraResources != null) {
 					for (Resource extraResource : extraResources) {
 						DirectoryScanner directoryScanner = new DirectoryScanner();
-						directoryScanner.setBasedir(extraResource.getDirectory());
+						directoryScanner.setBasedir(extraResource
+								.getDirectory());
 
-						directoryScanner.setExcludes(extraResource.getExcludes().toArray(
-								new String[extraResource.getExcludes().size()]));
+						directoryScanner.setExcludes(extraResource
+								.getExcludes().toArray(
+										new String[extraResource.getExcludes()
+												.size()]));
 
 						if (!extraResource.getIncludes().isEmpty()) {
-							directoryScanner.setIncludes(extraResource.getIncludes().toArray(
-									new String[extraResource.getIncludes().size()]));
-						} else {
+							directoryScanner.setIncludes(extraResource
+									.getIncludes().toArray(
+											new String[extraResource
+													.getIncludes().size()]));
+						}
+						else {
 							// include everything by default
 							directoryScanner.setIncludes(new String[] { "**" });
 						}
 
 						directoryScanner.scan();
-						for (String includeFile : directoryScanner.getIncludedFiles()) {
-							aos.putArchiveEntry(new JarArchiveEntry(Runner.EXTRA_RESOURCES_DIR + "/" + includeFile));
+						for (String includeFile : directoryScanner
+								.getIncludedFiles()) {
+							aos.putArchiveEntry(new JarArchiveEntry(
+									Runner.EXTRA_RESOURCES_DIR + "/"
+											+ includeFile));
 
-							Path extraFile = Paths.get(extraResource.getDirectory(), includeFile);
-							try (InputStream is = Files.newInputStream(extraFile)) {
+							Path extraFile = Paths.get(
+									extraResource.getDirectory(), includeFile);
+							try (InputStream is = Files
+									.newInputStream(extraFile)) {
 								IOUtils.copy(is, aos);
 							}
 							aos.closeArchiveEntry();
@@ -181,22 +203,29 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 				Set<String> includeArtifacts = new HashSet<>();
 				includeArtifacts.add("org.apache.tomcat:tomcat-jdbc");
-				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-core");
-				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-websocket");
-				includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-logging-juli");
+				includeArtifacts
+						.add("org.apache.tomcat.embed:tomcat-embed-core");
+				includeArtifacts
+						.add("org.apache.tomcat.embed:tomcat-embed-websocket");
+				includeArtifacts
+						.add("org.apache.tomcat.embed:tomcat-embed-logging-juli");
 				includeArtifacts.add("org.yaml:snakeyaml");
 				includeArtifacts.add("com.beust:jcommander");
 
 				if (includeJSPSupport) {
-					includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-jasper");
-					includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-el");
+					includeArtifacts
+							.add("org.apache.tomcat.embed:tomcat-embed-jasper");
+					includeArtifacts
+							.add("org.apache.tomcat.embed:tomcat-embed-el");
 					includeArtifacts.add("org.eclipse.jdt.core.compiler:ecj");
 				}
 
 				for (Artifact pluginArtifact : pluginArtifacts) {
-					String artifactName = pluginArtifact.getGroupId() + ":" + pluginArtifact.getArtifactId();
+					String artifactName = pluginArtifact.getGroupId() + ":"
+							+ pluginArtifact.getArtifactId();
 					if (includeArtifacts.contains(artifactName)) {
-						try (JarFile jarFile = new JarFile(pluginArtifact.getFile())) {
+						try (JarFile jarFile = new JarFile(
+								pluginArtifact.getFile())) {
 							extractJarToArchive(jarFile, aos);
 						}
 					}
@@ -206,17 +235,21 @@ public class PackageTcWarMojo extends AbstractMojo {
 					for (Dependency dependency : extraDependencies) {
 
 						ArtifactRequest request = new ArtifactRequest();
-						request.setArtifact(new DefaultArtifact(dependency.getGroupId(), dependency.getArtifactId(),
+						request.setArtifact(new DefaultArtifact(dependency
+								.getGroupId(), dependency.getArtifactId(),
 								dependency.getType(), dependency.getVersion()));
 						request.setRepositories(projectRepos);
 						ArtifactResult result;
 						try {
-							result = repoSystem.resolveArtifact(repoSession, request);
-						} catch (ArtifactResolutionException e) {
+							result = repoSystem.resolveArtifact(repoSession,
+									request);
+						}
+						catch (ArtifactResolutionException e) {
 							throw new MojoExecutionException(e.getMessage(), e);
 						}
 
-						try (JarFile jarFile = new JarFile(result.getArtifact().getFile())) {
+						try (JarFile jarFile = new JarFile(result.getArtifact()
+								.getFile())) {
 							extractJarToArchive(jarFile, aos);
 						}
 					}
@@ -224,10 +257,12 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 				if (includeJSPSupport) {
 					addFile(aos, "/conf/web.xml", "conf/web.xml");
-				} else {
+				}
+				else {
 					addFile(aos, "/conf/web_wo_jsp.xml", "conf/web.xml");
 				}
-				addFile(aos, "/conf/logging.properties", "conf/logging.properties");
+				addFile(aos, "/conf/logging.properties",
+						"conf/logging.properties");
 
 				if (includeTcNativeWin32 != null) {
 					aos.putArchiveEntry(new JarArchiveEntry("tcnative-1.dll.32"));
@@ -241,20 +276,27 @@ public class PackageTcWarMojo extends AbstractMojo {
 					aos.closeArchiveEntry();
 				}
 
-				String[] runnerClasses = { "ch.rasc.embeddedtc.runner.CheckConfig$CheckConfigOptions",
-						"ch.rasc.embeddedtc.runner.CheckConfig", "ch.rasc.embeddedtc.runner.Config",
-						"ch.rasc.embeddedtc.runner.Shutdown", "ch.rasc.embeddedtc.runner.Context",
+				String[] runnerClasses = {
+						"ch.rasc.embeddedtc.runner.CheckConfig$CheckConfigOptions",
+						"ch.rasc.embeddedtc.runner.CheckConfig",
+						"ch.rasc.embeddedtc.runner.Config",
+						"ch.rasc.embeddedtc.runner.Shutdown",
+						"ch.rasc.embeddedtc.runner.Context",
 						"ch.rasc.embeddedtc.runner.DeleteDirectory",
 						"ch.rasc.embeddedtc.runner.ObfuscateUtil$ObfuscateOptions",
-						"ch.rasc.embeddedtc.runner.ObfuscateUtil", "ch.rasc.embeddedtc.runner.Runner$1",
-						"ch.rasc.embeddedtc.runner.Runner$2", "ch.rasc.embeddedtc.runner.Runner$StartOptions",
+						"ch.rasc.embeddedtc.runner.ObfuscateUtil",
+						"ch.rasc.embeddedtc.runner.Runner$1",
+						"ch.rasc.embeddedtc.runner.Runner$2",
+						"ch.rasc.embeddedtc.runner.Runner$StartOptions",
 						"ch.rasc.embeddedtc.runner.Runner$StopOptions",
-						"ch.rasc.embeddedtc.runner.Runner$RunnerShutdownHook", "ch.rasc.embeddedtc.runner.Runner" };
+						"ch.rasc.embeddedtc.runner.Runner$RunnerShutdownHook",
+						"ch.rasc.embeddedtc.runner.Runner" };
 
 				for (String rc : runnerClasses) {
 					String classAsPath = rc.replace('.', '/') + ".class";
 
-					try (InputStream is = getClass().getResourceAsStream("/" + classAsPath)) {
+					try (InputStream is = getClass().getResourceAsStream(
+							"/" + classAsPath)) {
 						aos.putArchiveEntry(new JarArchiveEntry(classAsPath));
 						IOUtils.copy(is, aos);
 						aos.closeArchiveEntry();
@@ -272,23 +314,28 @@ public class PackageTcWarMojo extends AbstractMojo {
 				manifest.write(aos);
 				aos.closeArchiveEntry();
 
-				aos.putArchiveEntry(new JarArchiveEntry(Runner.TIMESTAMP_FILENAME));
-				aos.write(String.valueOf(System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8));
+				aos.putArchiveEntry(new JarArchiveEntry(
+						Runner.TIMESTAMP_FILENAME));
+				aos.write(String.valueOf(System.currentTimeMillis()).getBytes(
+						StandardCharsets.UTF_8));
 				aos.closeArchiveEntry();
 
 			}
-		} catch (IOException | ArchiveException | ManifestException e) {
+		}
+		catch (IOException | ArchiveException | ManifestException e) {
 			throw new MojoExecutionException(e.getMessage(), e);
 		}
 	}
 
-	private void addFile(ArchiveOutputStream aos, String from, String to) throws IOException {
+	private void addFile(ArchiveOutputStream aos, String from, String to)
+			throws IOException {
 		aos.putArchiveEntry(new JarArchiveEntry(to));
 		IOUtils.copy(getClass().getResourceAsStream(from), aos);
 		aos.closeArchiveEntry();
 	}
 
-	private static void extractJarToArchive(JarFile file, ArchiveOutputStream aos) throws IOException {
+	private static void extractJarToArchive(JarFile file,
+			ArchiveOutputStream aos) throws IOException {
 		Enumeration<? extends JarEntry> entries = file.entries();
 		while (entries.hasMoreElements()) {
 			JarEntry j = entries.nextElement();

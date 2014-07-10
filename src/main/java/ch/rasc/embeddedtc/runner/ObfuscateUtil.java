@@ -41,34 +41,47 @@ public class ObfuscateUtil {
 
 	public static final String ENCODE = "ENC";
 
-	public static String encrypt(String plainText, String password) throws Exception {
+	public static String encrypt(String plainText, String password)
+			throws Exception {
 
 		byte[] salt = new byte[8];
 		SecureRandom random = new SecureRandom();
 		random.nextBytes(salt);
 
-		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
-		SecretKey key = keyFactory.generateSecret(new PBEKeySpec(password.toCharArray()));
+		SecretKeyFactory keyFactory = SecretKeyFactory
+				.getInstance("PBEWithMD5AndDES");
+		SecretKey key = keyFactory.generateSecret(new PBEKeySpec(password
+				.toCharArray()));
 		Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-		pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(salt, 20));
-		return ENCODE + DatatypeConverter.printBase64Binary(salt)
-				+ DatatypeConverter.printBase64Binary(pbeCipher.doFinal(plainText.getBytes()));
+		pbeCipher
+				.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(salt, 20));
+		return ENCODE
+				+ DatatypeConverter.printBase64Binary(salt)
+				+ DatatypeConverter.printBase64Binary(pbeCipher
+						.doFinal(plainText.getBytes()));
 	}
 
 	public static String decrypt(String encryptedText, String password) {
 		try {
-			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
-			SecretKey key = keyFactory.generateSecret(new PBEKeySpec(password.toCharArray()));
+			SecretKeyFactory keyFactory = SecretKeyFactory
+					.getInstance("PBEWithMD5AndDES");
+			SecretKey key = keyFactory.generateSecret(new PBEKeySpec(password
+					.toCharArray()));
 			Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 
 			String enc = encryptedText.substring(ENCODE.length() + 12);
-			byte[] salt = DatatypeConverter.parseBase64Binary(encryptedText.substring(ENCODE.length(),
-					ENCODE.length() + 12));
+			byte[] salt = DatatypeConverter.parseBase64Binary(encryptedText
+					.substring(ENCODE.length(), ENCODE.length() + 12));
 
-			pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(salt, 20));
-			return new String(pbeCipher.doFinal(DatatypeConverter.parseBase64Binary(enc)));
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException
-				| InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+			pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(salt,
+					20));
+			return new String(pbeCipher.doFinal(DatatypeConverter
+					.parseBase64Binary(enc)));
+		}
+		catch (InvalidKeyException | NoSuchAlgorithmException
+				| InvalidKeySpecException | NoSuchPaddingException
+				| InvalidAlgorithmParameterException
+				| IllegalBlockSizeException | BadPaddingException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -137,10 +150,13 @@ public class ObfuscateUtil {
 		return new String(b, 0, l);
 	}
 
-	public static void obfuscate(ObfuscateOptions obfuscateOptions) throws Exception {
+	public static void obfuscate(ObfuscateOptions obfuscateOptions)
+			throws Exception {
 		if (obfuscateOptions.password != null) {
-			System.err.println(encrypt(obfuscateOptions.plainText.get(0), obfuscateOptions.password));
-		} else {
+			System.err.println(encrypt(obfuscateOptions.plainText.get(0),
+					obfuscateOptions.password));
+		}
+		else {
 			System.err.println(obfuscate(obfuscateOptions.plainText.get(0)));
 		}
 	}
@@ -152,7 +168,8 @@ public class ObfuscateUtil {
 
 		if (encryptedText.startsWith(OBFUSCATE)) {
 			return deobfuscate(encryptedText);
-		} else if (encryptedText.startsWith(ENCODE) && password != null) {
+		}
+		else if (encryptedText.startsWith(ENCODE) && password != null) {
 			return decrypt(encryptedText, password);
 		}
 

@@ -33,10 +33,12 @@ public class CheckConfig {
 
 		try {
 			Path configFile;
-			String pathToConfigFile = checkConfigOptions.configFile != null && !checkConfigOptions.configFile.isEmpty() ? checkConfigOptions.configFile
+			String pathToConfigFile = checkConfigOptions.configFile != null
+					&& !checkConfigOptions.configFile.isEmpty() ? checkConfigOptions.configFile
 					.get(0) : null;
 
-			URL url = Runner.class.getProtectionDomain().getCodeSource().getLocation();
+			URL url = Runner.class.getProtectionDomain().getCodeSource()
+					.getLocation();
 			Path myJar = Paths.get(url.toURI());
 			Path myJarDir = myJar.getParent();
 
@@ -45,7 +47,8 @@ public class CheckConfig {
 				if (!configFile.isAbsolute()) {
 					configFile = myJarDir.resolve(pathToConfigFile);
 				}
-			} else {
+			}
+			else {
 				configFile = myJarDir.resolve("config.yaml");
 			}
 
@@ -64,10 +67,13 @@ public class CheckConfig {
 					System.out.printf("Config file %s is OK", configFile);
 				}
 
-			} else {
-				System.out.printf("Config file %s does not exists\n", configFile);
 			}
-		} catch (Exception e) {
+			else {
+				System.out.printf("Config file %s does not exists\n",
+						configFile);
+			}
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
