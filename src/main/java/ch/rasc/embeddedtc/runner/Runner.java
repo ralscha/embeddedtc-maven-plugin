@@ -112,11 +112,9 @@ public class Runner {
 				arguments = args;
 			}
 			else {
-				List<String> argumentsList = new ArrayList<>(
-						Arrays.asList(args));
+				List<String> argumentsList = new ArrayList<>(Arrays.asList(args));
 				argumentsList.add(0, "start");
-				arguments = argumentsList.toArray(new String[argumentsList
-						.size()]);
+				arguments = argumentsList.toArray(new String[argumentsList.size()]);
 			}
 		}
 
@@ -156,27 +154,23 @@ public class Runner {
 	}
 
 	@SuppressWarnings("resource")
-	private static void startTc(StartOptions startOptions)
-			throws URISyntaxException, IOException, Exception,
-			ServletException, LifecycleException {
+	private static void startTc(StartOptions startOptions) throws URISyntaxException,
+			IOException, Exception, ServletException, LifecycleException {
 
 		final Config config = readConfig(startOptions.configFile != null
-				&& !startOptions.configFile.isEmpty() ? startOptions.configFile
-				.get(0) : null);
+				&& !startOptions.configFile.isEmpty() ? startOptions.configFile.get(0)
+				: null);
 
-		for (Map.Entry<String, Object> entry : config.getSystemProperties()
-				.entrySet()) {
+		for (Map.Entry<String, Object> entry : config.getSystemProperties().entrySet()) {
 			String value = entry.getValue().toString();
 			value = ObfuscateUtil.toPlaintext(value, startOptions.password);
 			System.setProperty(entry.getKey(), value);
 		}
 
-		Path configuredPathToExtractDir = Paths.get(config
-				.getExtractDirectory());
+		Path configuredPathToExtractDir = Paths.get(config.getExtractDirectory());
 		final Path extractDir;
 		if (!configuredPathToExtractDir.isAbsolute()) {
-			extractDir = config.getMyJarDirectory().resolve(
-					configuredPathToExtractDir);
+			extractDir = config.getMyJarDirectory().resolve(configuredPathToExtractDir);
 		}
 		else {
 			extractDir = configuredPathToExtractDir;
@@ -187,8 +181,7 @@ public class Runner {
 		if (Files.exists(extractDir) && !startOptions.clean) {
 			Path timestampFile = extractDir.resolve(TIMESTAMP_FILENAME);
 			if (Files.exists(timestampFile)) {
-				byte[] extractTimestampBytes = Files
-						.readAllBytes(timestampFile);
+				byte[] extractTimestampBytes = Files.readAllBytes(timestampFile);
 				String extractTimestamp = new String(extractTimestampBytes,
 						StandardCharsets.UTF_8);
 
@@ -198,19 +191,17 @@ public class Runner {
 						ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
 					copy(is, bos);
-					timestamp = new String(bos.toByteArray(),
-							StandardCharsets.UTF_8);
+					timestamp = new String(bos.toByteArray(), StandardCharsets.UTF_8);
 				}
 
-				if (Long.valueOf(timestamp) <= Long.valueOf(extractTimestamp)) {
+				if (Long.parseLong(timestamp) <= Long.parseLong(extractTimestamp)) {
 					extractWar = false;
 				}
 
 			}
 		}
 
-		boolean isWin = System.getProperty("os.name").toLowerCase()
-				.contains("win");
+		boolean isWin = System.getProperty("os.name").toLowerCase().contains("win");
 
 		Path loggingPropertyFile = extractDir.resolve("logging.properties");
 		Path loggingDir = extractDir.resolve("logs");
@@ -251,14 +242,12 @@ public class Runner {
 
 			for (String war : warList) {
 				Path warFile = extractDir.resolve(war);
-				try (InputStream is = Runner.class.getResourceAsStream("/"
-						+ war)) {
+				try (InputStream is = Runner.class.getResourceAsStream("/" + war)) {
 					Files.copy(is, warFile);
 				}
 			}
 
-			try (InputStream is = Runner.class
-					.getResourceAsStream("/conf/web.xml")) {
+			try (InputStream is = Runner.class.getResourceAsStream("/conf/web.xml")) {
 				Files.copy(is, defaultWebxmlFile);
 			}
 
@@ -271,8 +260,7 @@ public class Runner {
 				for (String extra : extraList) {
 					Path extraFile = extractDir.resolve(extra);
 					Files.createDirectories(extraFile.getParent());
-					try (InputStream is = Runner.class.getResourceAsStream("/"
-							+ extra)) {
+					try (InputStream is = Runner.class.getResourceAsStream("/" + extra)) {
 						Files.copy(is, extraFile);
 					}
 				}
@@ -316,24 +304,20 @@ public class Runner {
 			libraryPath = extractDir.toString() + ";" + libraryPath;
 			System.setProperty("java.library.path", libraryPath);
 
-			Field fieldSysPath = ClassLoader.class
-					.getDeclaredField("sys_paths");
+			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
 			fieldSysPath.setAccessible(true);
 			fieldSysPath.set(null, null);
 		}
 
 		List<String> absolutePathsToEmbeddedWars = new ArrayList<>();
 
-		try (DirectoryStream<Path> wars = Files.newDirectoryStream(extractDir,
-				"*.war")) {
+		try (DirectoryStream<Path> wars = Files.newDirectoryStream(extractDir, "*.war")) {
 			for (Path war : wars) {
-				absolutePathsToEmbeddedWars
-						.add(war.toAbsolutePath().toString());
+				absolutePathsToEmbeddedWars.add(war.toAbsolutePath().toString());
 			}
 		}
 
-		System.setProperty("java.io.tmpdir", tempDir.toAbsolutePath()
-				.toString());
+		System.setProperty("java.io.tmpdir", tempDir.toAbsolutePath().toString());
 		System.setProperty("log.dir", loggingDir.toAbsolutePath().toString());
 		System.setProperty("java.util.logging.config.file", loggingPropertyFile
 				.toAbsolutePath().toString());
@@ -358,8 +342,8 @@ public class Runner {
 		tomcat = new Tomcat() {
 
 			@Override
-			public Context addWebapp(@SuppressWarnings("hiding") Host host,
-					String url, String name, String path) {
+			public Context addWebapp(@SuppressWarnings("hiding") Host host, String url,
+					String name, String path) {
 				String base = "org.apache.catalina.core.ContainerBase.[default].[";
 				if (host == null) {
 					base += getHost().getName();
@@ -384,8 +368,7 @@ public class Runner {
 
 				ContextConfig ctxCfg = new ContextConfig();
 				ctx.addLifecycleListener(ctxCfg);
-				ctxCfg.setDefaultWebXml(defaultWebxmlFile.toAbsolutePath()
-						.toString());
+				ctxCfg.setDefaultWebXml(defaultWebxmlFile.toAbsolutePath().toString());
 				getHost().addChild(ctx);
 
 				return ctx;
@@ -396,10 +379,8 @@ public class Runner {
 		tomcat.setBaseDir(extractDir.toAbsolutePath().toString());
 		tomcat.setSilent(config.isSilent());
 
-		for (String s : new String[] {
-				"org.apache.coyote.http11.Http11NioProtocol",
-				"org.apache.tomcat.util.net.NioSelectorPool",
-				Runner.class.getName() }) {
+		for (String s : new String[] { "org.apache.coyote.http11.Http11NioProtocol",
+				"org.apache.tomcat.util.net.NioSelectorPool", Runner.class.getName() }) {
 			if (config.isSilent()) {
 				Logger.getLogger(s).setLevel(Level.WARNING);
 			}
@@ -444,8 +425,7 @@ public class Runner {
 		}
 
 		List<Context> contextsWithoutSessionPersistence = new ArrayList<>();
-		for (ch.rasc.embeddedtc.runner.Context configuredContext : config
-				.getContexts()) {
+		for (ch.rasc.embeddedtc.runner.Context configuredContext : config.getContexts()) {
 			configuredContext.decryptPasswords(startOptions.password);
 
 			String contextPath = configuredContext.getContextPath();
@@ -458,9 +438,8 @@ public class Runner {
 			if (configuredContext.getEmbeddedWar() != null) {
 				if (configuredContext.getEmbeddedWar().contains("*")) {
 					String regex = ".*?"
-							+ configuredContext.getEmbeddedWar()
-									.replace("\\", "\\\\").replace(".", "\\.")
-									.replace("*", ".*?") + "$";
+							+ configuredContext.getEmbeddedWar().replace("\\", "\\\\")
+									.replace(".", "\\.").replace("*", ".*?") + "$";
 					Pattern pattern = Pattern.compile(regex);
 
 					for (String warAbsolutePath : absolutePathsToEmbeddedWars) {
@@ -480,15 +459,13 @@ public class Runner {
 				}
 			}
 			else if (configuredContext.getExternalWar() != null) {
-				Path externWarPath = Paths.get(configuredContext
-						.getExternalWar());
+				Path externWarPath = Paths.get(configuredContext.getExternalWar());
 				if (externWarPath.isAbsolute()) {
 					warPath = configuredContext.getExternalWar();
 				}
 				else {
 					warPath = config.getMyJarDirectory()
-							.resolve(configuredContext.getExternalWar())
-							.toString();
+							.resolve(configuredContext.getExternalWar()).toString();
 				}
 			}
 			else {
@@ -504,8 +481,7 @@ public class Runner {
 				ctx.getNamingResources().addEnvironment(env);
 			}
 
-			for (ContextResource res : configuredContext
-					.createContextResourceObjects()) {
+			for (ContextResource res : configuredContext.createContextResourceObjects()) {
 				ctx.getNamingResources().addResource(res);
 			}
 
@@ -514,8 +490,7 @@ public class Runner {
 			}
 
 			if (configuredContext.getContextFile() != null) {
-				Path contextFilePath = Paths.get(configuredContext
-						.getContextFile());
+				Path contextFilePath = Paths.get(configuredContext.getContextFile());
 				if (Files.exists(contextFilePath)) {
 					try {
 						URL contextFileURL = contextFilePath.toUri().toURL();
@@ -523,8 +498,7 @@ public class Runner {
 					}
 					catch (Exception e) {
 						getLogger().error(
-								"Problem with the context file: "
-										+ e.getMessage());
+								"Problem with the context file: " + e.getMessage());
 					}
 				}
 			}
@@ -586,17 +560,15 @@ public class Runner {
 		}
 	}
 
-	private static void stopTc(StopOptions stopOptions)
-			throws URISyntaxException, IOException {
+	private static void stopTc(StopOptions stopOptions) throws URISyntaxException,
+			IOException {
 		Config config = readConfig(stopOptions.configFile != null
-				&& !stopOptions.configFile.isEmpty() ? stopOptions.configFile
-				.get(0) : null);
-		if (config.getShutdown() != null
-				&& config.getShutdown().getPort() != null) {
+				&& !stopOptions.configFile.isEmpty() ? stopOptions.configFile.get(0)
+				: null);
+		if (config.getShutdown() != null && config.getShutdown().getPort() != null) {
 
 			// send shutdown command
-			try (Socket socket = new Socket("localhost", config.getShutdown()
-					.getPort());
+			try (Socket socket = new Socket("localhost", config.getShutdown().getPort());
 					final OutputStream stream = socket.getOutputStream()) {
 
 				String command = config.getShutdown().getCommand();
@@ -610,10 +582,10 @@ public class Runner {
 		}
 	}
 
-	private static Config readConfig(String pathToConfigFile)
-			throws URISyntaxException, IOException {
-		URL myJarLocationURL = Runner.class.getProtectionDomain()
-				.getCodeSource().getLocation();
+	private static Config readConfig(String pathToConfigFile) throws URISyntaxException,
+			IOException {
+		URL myJarLocationURL = Runner.class.getProtectionDomain().getCodeSource()
+				.getLocation();
 		Path myJar = Paths.get(myJarLocationURL.toURI());
 		Path myJarDir = myJar.getParent();
 
@@ -664,8 +636,7 @@ public class Runner {
 		return LogFactory.getLog(Runner.class);
 	}
 
-	private static void copy(InputStream source, OutputStream sink)
-			throws IOException {
+	private static void copy(InputStream source, OutputStream sink) throws IOException {
 		byte[] buf = new byte[8192];
 		int n;
 		while ((n = source.read(buf)) > 0) {
@@ -702,7 +673,8 @@ public class Runner {
 		@Parameter(names = { "-p", "--password" }, description = "The password")
 		private String password;
 
-		@Parameter(names = { "-c", "--clean" }, description = "Force deletion of extraction directory at startup")
+		@Parameter(names = { "-c", "--clean" },
+				description = "Force deletion of extraction directory at startup")
 		private boolean clean;
 	}
 

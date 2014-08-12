@@ -84,8 +84,7 @@ public class Context {
 				return Collections.singletonList(environment);
 			}
 
-			List<ContextEnvironment> combinedEnvironments = new ArrayList<>(
-					environments);
+			List<ContextEnvironment> combinedEnvironments = new ArrayList<>(environments);
 			combinedEnvironments.add(environment);
 			return combinedEnvironments;
 		}
@@ -119,8 +118,7 @@ public class Context {
 				return Collections.singletonList(parameter);
 			}
 
-			List<ApplicationParameter> combinedParameters = new ArrayList<>(
-					parameters);
+			List<ApplicationParameter> combinedParameters = new ArrayList<>(parameters);
 			combinedParameters.add(parameter);
 			return combinedParameters;
 		}
@@ -145,8 +143,8 @@ public class Context {
 	}
 
 	public boolean hasEnvironmentsOrResources() {
-		return !environments.isEmpty() || !resources.isEmpty()
-				|| environment != null || resource != null;
+		return !environments.isEmpty() || !resources.isEmpty() || environment != null
+				|| resource != null;
 	}
 
 	public List<ContextResource> createContextResourceObjects() {
@@ -165,8 +163,8 @@ public class Context {
 			ContextResource contextResource = new ContextResource();
 
 			for (Map.Entry<String, Object> entry : res.entrySet()) {
-				IntrospectionUtils.setProperty(contextResource, entry.getKey(),
-						entry.getValue().toString());
+				IntrospectionUtils.setProperty(contextResource, entry.getKey(), entry
+						.getValue().toString());
 			}
 
 			crObjects.add(contextResource);
@@ -177,8 +175,7 @@ public class Context {
 
 	public void decryptPasswords(String password) {
 		if (parameter != null) {
-			parameter.setValue(ObfuscateUtil.toPlaintext(parameter.getValue(),
-					password));
+			parameter.setValue(ObfuscateUtil.toPlaintext(parameter.getValue(), password));
 		}
 
 		if (resource != null) {
@@ -196,8 +193,8 @@ public class Context {
 		}
 
 		if (environment != null) {
-			environment.setValue(ObfuscateUtil.toPlaintext(
-					environment.getValue(), password));
+			environment.setValue(ObfuscateUtil.toPlaintext(environment.getValue(),
+					password));
 		}
 
 		List<Map<String, Object>> newResources = new ArrayList<>();
@@ -228,13 +225,12 @@ public class Context {
 
 	@Override
 	public String toString() {
-		return "Context [embeddedWar=" + embeddedWar + ", externalWar="
-				+ externalWar + ", contextPath=" + contextPath
-				+ ", contextFile=" + contextFile + ", sessionPersistence="
-				+ sessionPersistence + ", resources=" + resources
-				+ ", environments=" + environments + ", parameters="
-				+ parameters + ", resource=" + resource + ", environment="
-				+ environment + ", parameter=" + parameter + "]";
+		return "Context [embeddedWar=" + embeddedWar + ", externalWar=" + externalWar
+				+ ", contextPath=" + contextPath + ", contextFile=" + contextFile
+				+ ", sessionPersistence=" + sessionPersistence + ", resources="
+				+ resources + ", environments=" + environments + ", parameters="
+				+ parameters + ", resource=" + resource + ", environment=" + environment
+				+ ", parameter=" + parameter + "]";
 	}
 
 }

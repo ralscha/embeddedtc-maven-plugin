@@ -198,8 +198,8 @@ public class Config {
 
 			for (Map.Entry<String, Object> entry : con.entrySet()) {
 				if (!entry.getKey().equals(CONNECTOR_PROTOCOL)) {
-					IntrospectionUtils.setProperty(tcConnector, entry.getKey(),
-							entry.getValue().toString());
+					IntrospectionUtils.setProperty(tcConnector, entry.getKey(), entry
+							.getValue().toString());
 				}
 			}
 
@@ -246,8 +246,8 @@ public class Config {
 		for (Map<String, Object> v : valves) {
 			String className = (String) v.get(VALVE_CLASSNAME);
 			if (className == null) {
-				Runner.getLogger().warn(
-						"Missing className option in valve configuration");
+				Runner.getLogger()
+						.warn("Missing className option in valve configuration");
 				continue;
 			}
 
@@ -257,8 +257,7 @@ public class Config {
 				valveClass = (Class<Valve>) Class.forName(className);
 			}
 			catch (ClassNotFoundException e) {
-				Runner.getLogger().warn(
-						"Valve className '" + className + "' not found");
+				Runner.getLogger().warn("Valve className '" + className + "' not found");
 				continue;
 			}
 
@@ -275,8 +274,8 @@ public class Config {
 
 			for (Map.Entry<String, Object> entry : v.entrySet()) {
 				if (!entry.getKey().equals(VALVE_CLASSNAME)) {
-					IntrospectionUtils.setProperty(valveObject, entry.getKey(),
-							entry.getValue().toString());
+					IntrospectionUtils.setProperty(valveObject, entry.getKey(), entry
+							.getValue().toString());
 				}
 			}
 
@@ -288,8 +287,7 @@ public class Config {
 
 	public boolean isEnableNaming() {
 		for (Context ctx : getContexts()) {
-			if (ctx.hasEnvironmentsOrResources()
-					|| ctx.getContextFile() != null) {
+			if (ctx.hasEnvironmentsOrResources() || ctx.getContextFile() != null) {
 				return true;
 			}
 		}
@@ -299,10 +297,9 @@ public class Config {
 
 	@Override
 	public String toString() {
-		return "Config [jvmRoute=" + jvmRoute + ", silent=" + silent
-				+ ", listeners=" + listeners + ", systemProperties="
-				+ systemProperties + ", connectors=" + connectors
-				+ ", context=" + context + ", contexts=" + contexts + "]";
+		return "Config [jvmRoute=" + jvmRoute + ", silent=" + silent + ", listeners="
+				+ listeners + ", systemProperties=" + systemProperties + ", connectors="
+				+ connectors + ", context=" + context + ", contexts=" + contexts + "]";
 	}
 
 }

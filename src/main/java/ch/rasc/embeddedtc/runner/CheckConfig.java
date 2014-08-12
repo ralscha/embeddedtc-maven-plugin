@@ -37,8 +37,7 @@ public class CheckConfig {
 					&& !checkConfigOptions.configFile.isEmpty() ? checkConfigOptions.configFile
 					.get(0) : null;
 
-			URL url = Runner.class.getProtectionDomain().getCodeSource()
-					.getLocation();
+			URL url = Runner.class.getProtectionDomain().getCodeSource().getLocation();
 			Path myJar = Paths.get(url.toURI());
 			Path myJarDir = myJar.getParent();
 
@@ -69,8 +68,7 @@ public class CheckConfig {
 
 			}
 			else {
-				System.out.printf("Config file %s does not exists\n",
-						configFile);
+				System.out.printf("Config file %s does not exists\n", configFile);
 			}
 		}
 		catch (Exception e) {
