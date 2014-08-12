@@ -241,6 +241,7 @@
 						<exclude>**/.gitignore</exclude>
 						<exclude>**/*.bat</exclude>
 						<exclude>**/*.py</exclude>
+						<exclude>**/pom.xml</exclude>
 					</excludes>
 					<strictCheck>true</strictCheck>
 				</configuration>
