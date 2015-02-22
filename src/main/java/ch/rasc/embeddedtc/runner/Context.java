@@ -50,7 +50,7 @@ public class Context {
 	private ApplicationParameter parameter;
 
 	public String getEmbeddedWar() {
-		return embeddedWar;
+		return this.embeddedWar;
 	}
 
 	public void setEmbeddedWar(String embeddedWar) {
@@ -58,7 +58,7 @@ public class Context {
 	}
 
 	public String getExternalWar() {
-		return externalWar;
+		return this.externalWar;
 	}
 
 	public void setExternalWar(String externalWar) {
@@ -66,7 +66,7 @@ public class Context {
 	}
 
 	public String getContextPath() {
-		return contextPath;
+		return this.contextPath;
 	}
 
 	public void setContextPath(String contextPath) {
@@ -79,17 +79,18 @@ public class Context {
 
 	public List<ContextEnvironment> getEnvironments() {
 
-		if (environment != null) {
-			if (environments.isEmpty()) {
-				return Collections.singletonList(environment);
+		if (this.environment != null) {
+			if (this.environments.isEmpty()) {
+				return Collections.singletonList(this.environment);
 			}
 
-			List<ContextEnvironment> combinedEnvironments = new ArrayList<>(environments);
-			combinedEnvironments.add(environment);
+			List<ContextEnvironment> combinedEnvironments = new ArrayList<>(
+					this.environments);
+			combinedEnvironments.add(this.environment);
 			return combinedEnvironments;
 		}
 
-		return environments;
+		return this.environments;
 	}
 
 	public void setEnvironments(List<ContextEnvironment> environments) {
@@ -97,7 +98,7 @@ public class Context {
 	}
 
 	public boolean isSessionPersistence() {
-		return sessionPersistence;
+		return this.sessionPersistence;
 	}
 
 	public void setSessionPersistence(boolean sessionPersistence) {
@@ -105,7 +106,7 @@ public class Context {
 	}
 
 	public String getContextFile() {
-		return contextFile;
+		return this.contextFile;
 	}
 
 	public void setContextFile(String contextFile) {
@@ -113,17 +114,18 @@ public class Context {
 	}
 
 	public List<ApplicationParameter> getParameters() {
-		if (parameter != null) {
-			if (parameters.isEmpty()) {
-				return Collections.singletonList(parameter);
+		if (this.parameter != null) {
+			if (this.parameters.isEmpty()) {
+				return Collections.singletonList(this.parameter);
 			}
 
-			List<ApplicationParameter> combinedParameters = new ArrayList<>(parameters);
-			combinedParameters.add(parameter);
+			List<ApplicationParameter> combinedParameters = new ArrayList<>(
+					this.parameters);
+			combinedParameters.add(this.parameter);
 			return combinedParameters;
 		}
 
-		return parameters;
+		return this.parameters;
 	}
 
 	public void setParameters(List<ApplicationParameter> parameters) {
@@ -143,23 +145,23 @@ public class Context {
 	}
 
 	public boolean hasEnvironmentsOrResources() {
-		return !environments.isEmpty() || !resources.isEmpty() || environment != null
-				|| resource != null;
+		return !this.environments.isEmpty() || !this.resources.isEmpty()
+				|| this.environment != null || this.resource != null;
 	}
 
 	public List<ContextResource> createContextResourceObjects() {
 		List<ContextResource> crObjects = new ArrayList<>();
 
-		if (resource != null) {
-			if (resources.isEmpty()) {
-				setResources(Collections.singletonList(resource));
+		if (this.resource != null) {
+			if (this.resources.isEmpty()) {
+				setResources(Collections.singletonList(this.resource));
 			}
 			else {
-				resources.add(resource);
+				this.resources.add(this.resource);
 			}
 		}
 
-		for (Map<String, Object> res : resources) {
+		for (Map<String, Object> res : this.resources) {
 			ContextResource contextResource = new ContextResource();
 
 			for (Map.Entry<String, Object> entry : res.entrySet()) {
@@ -174,13 +176,14 @@ public class Context {
 	}
 
 	public void decryptPasswords(String password) {
-		if (parameter != null) {
-			parameter.setValue(ObfuscateUtil.toPlaintext(parameter.getValue(), password));
+		if (this.parameter != null) {
+			this.parameter.setValue(ObfuscateUtil.toPlaintext(this.parameter.getValue(),
+					password));
 		}
 
-		if (resource != null) {
+		if (this.resource != null) {
 			Map<String, Object> newResource = new HashMap<>();
-			for (Map.Entry<String, Object> entry : resource.entrySet()) {
+			for (Map.Entry<String, Object> entry : this.resource.entrySet()) {
 				if (entry.getValue() instanceof String) {
 					newResource.put(entry.getKey(), ObfuscateUtil.toPlaintext(
 							(String) entry.getValue(), password));
@@ -189,16 +192,16 @@ public class Context {
 					newResource.put(entry.getKey(), entry.getValue());
 				}
 			}
-			resource = newResource;
+			this.resource = newResource;
 		}
 
-		if (environment != null) {
-			environment.setValue(ObfuscateUtil.toPlaintext(environment.getValue(),
-					password));
+		if (this.environment != null) {
+			this.environment.setValue(ObfuscateUtil.toPlaintext(
+					this.environment.getValue(), password));
 		}
 
 		List<Map<String, Object>> newResources = new ArrayList<>();
-		for (Map<String, Object> res : resources) {
+		for (Map<String, Object> res : this.resources) {
 			Map<String, Object> newResource = new HashMap<>();
 			for (Map.Entry<String, Object> entry : res.entrySet()) {
 				if (entry.getValue() instanceof String) {
@@ -211,13 +214,13 @@ public class Context {
 			}
 			newResources.add(newResource);
 		}
-		resources = newResources;
+		this.resources = newResources;
 
-		for (ContextEnvironment ce : environments) {
+		for (ContextEnvironment ce : this.environments) {
 			ce.setValue(ObfuscateUtil.toPlaintext(ce.getValue(), password));
 		}
 
-		for (ApplicationParameter ap : parameters) {
+		for (ApplicationParameter ap : this.parameters) {
 			ap.setValue(ObfuscateUtil.toPlaintext(ap.getValue(), password));
 		}
 
@@ -225,12 +228,13 @@ public class Context {
 
 	@Override
 	public String toString() {
-		return "Context [embeddedWar=" + embeddedWar + ", externalWar=" + externalWar
-				+ ", contextPath=" + contextPath + ", contextFile=" + contextFile
-				+ ", sessionPersistence=" + sessionPersistence + ", resources="
-				+ resources + ", environments=" + environments + ", parameters="
-				+ parameters + ", resource=" + resource + ", environment=" + environment
-				+ ", parameter=" + parameter + "]";
+		return "Context [embeddedWar=" + this.embeddedWar + ", externalWar="
+				+ this.externalWar + ", contextPath=" + this.contextPath
+				+ ", contextFile=" + this.contextFile + ", sessionPersistence="
+				+ this.sessionPersistence + ", resources=" + this.resources
+				+ ", environments=" + this.environments + ", parameters="
+				+ this.parameters + ", resource=" + this.resource + ", environment="
+				+ this.environment + ", parameter=" + this.parameter + "]";
 	}
 
 }

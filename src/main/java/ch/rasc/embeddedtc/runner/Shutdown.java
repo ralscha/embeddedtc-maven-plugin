@@ -21,7 +21,7 @@ public class Shutdown {
 	private String command = "SHUTDOWN_EXECUTABLE_JAR";
 
 	public Integer getPort() {
-		return port;
+		return this.port;
 	}
 
 	public void setPort(Integer port) {
@@ -29,7 +29,7 @@ public class Shutdown {
 	}
 
 	public String getCommand() {
-		return command;
+		return this.command;
 	}
 
 	public void setCommand(String command) {

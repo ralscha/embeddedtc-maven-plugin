@@ -106,7 +106,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 
-		Path warExecFile = Paths.get(buildDirectory, finalName);
+		Path warExecFile = Paths.get(this.buildDirectory, this.finalName);
 		try {
 			Files.deleteIfExists(warExecFile);
 			Files.createDirectories(warExecFile.getParent());
@@ -116,8 +116,8 @@ public class PackageTcWarMojo extends AbstractMojo {
 							.createArchiveOutputStream(ArchiveStreamFactory.JAR, os)) {
 
 				// If project is a war project add the war to the project
-				if ("war".equalsIgnoreCase(project.getPackaging())) {
-					File projectArtifact = project.getArtifact().getFile();
+				if ("war".equalsIgnoreCase(this.project.getPackaging())) {
+					File projectArtifact = this.project.getArtifact().getFile();
 					if (projectArtifact != null && Files.exists(projectArtifact.toPath())) {
 						aos.putArchiveEntry(new JarArchiveEntry(projectArtifact.getName()));
 						try (InputStream is = Files.newInputStream(projectArtifact
@@ -129,17 +129,18 @@ public class PackageTcWarMojo extends AbstractMojo {
 				}
 
 				// Add extraWars into the jar
-				if (extraWars != null) {
-					for (Dependency extraWarDependency : extraWars) {
+				if (this.extraWars != null) {
+					for (Dependency extraWarDependency : this.extraWars) {
 						ArtifactRequest request = new ArtifactRequest();
 						request.setArtifact(new DefaultArtifact(extraWarDependency
 								.getGroupId(), extraWarDependency.getArtifactId(),
 								extraWarDependency.getType(), extraWarDependency
 										.getVersion()));
-						request.setRepositories(projectRepos);
+						request.setRepositories(this.projectRepos);
 						ArtifactResult result;
 						try {
-							result = repoSystem.resolveArtifact(repoSession, request);
+							result = this.repoSystem.resolveArtifact(this.repoSession,
+									request);
 						}
 						catch (ArtifactResolutionException e) {
 							throw new MojoExecutionException(e.getMessage(), e);
@@ -156,8 +157,8 @@ public class PackageTcWarMojo extends AbstractMojo {
 				}
 
 				// Add extraResources into the jar. Folder /extra
-				if (extraResources != null) {
-					for (Resource extraResource : extraResources) {
+				if (this.extraResources != null) {
+					for (Resource extraResource : this.extraResources) {
 						DirectoryScanner directoryScanner = new DirectoryScanner();
 						directoryScanner.setBasedir(extraResource.getDirectory());
 
@@ -200,13 +201,13 @@ public class PackageTcWarMojo extends AbstractMojo {
 				includeArtifacts.add("org.yaml:snakeyaml");
 				includeArtifacts.add("com.beust:jcommander");
 
-				if (includeJSPSupport) {
+				if (this.includeJSPSupport) {
 					includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-jasper");
 					includeArtifacts.add("org.apache.tomcat.embed:tomcat-embed-el");
 					includeArtifacts.add("org.eclipse.jdt.core.compiler:ecj");
 				}
 
-				for (Artifact pluginArtifact : pluginArtifacts) {
+				for (Artifact pluginArtifact : this.pluginArtifacts) {
 					String artifactName = pluginArtifact.getGroupId() + ":"
 							+ pluginArtifact.getArtifactId();
 					if (includeArtifacts.contains(artifactName)) {
@@ -216,17 +217,18 @@ public class PackageTcWarMojo extends AbstractMojo {
 					}
 				}
 
-				if (extraDependencies != null) {
-					for (Dependency dependency : extraDependencies) {
+				if (this.extraDependencies != null) {
+					for (Dependency dependency : this.extraDependencies) {
 
 						ArtifactRequest request = new ArtifactRequest();
 						request.setArtifact(new DefaultArtifact(dependency.getGroupId(),
 								dependency.getArtifactId(), dependency.getType(),
 								dependency.getVersion()));
-						request.setRepositories(projectRepos);
+						request.setRepositories(this.projectRepos);
 						ArtifactResult result;
 						try {
-							result = repoSystem.resolveArtifact(repoSession, request);
+							result = this.repoSystem.resolveArtifact(this.repoSession,
+									request);
 						}
 						catch (ArtifactResolutionException e) {
 							throw new MojoExecutionException(e.getMessage(), e);
@@ -238,7 +240,7 @@ public class PackageTcWarMojo extends AbstractMojo {
 					}
 				}
 
-				if (includeJSPSupport) {
+				if (this.includeJSPSupport) {
 					addFile(aos, "/conf/web.xml", "conf/web.xml");
 				}
 				else {
@@ -246,15 +248,15 @@ public class PackageTcWarMojo extends AbstractMojo {
 				}
 				addFile(aos, "/conf/logging.properties", "conf/logging.properties");
 
-				if (includeTcNativeWin32 != null) {
+				if (this.includeTcNativeWin32 != null) {
 					aos.putArchiveEntry(new JarArchiveEntry("tcnative-1.dll.32"));
-					Files.copy(Paths.get(includeTcNativeWin32), aos);
+					Files.copy(Paths.get(this.includeTcNativeWin32), aos);
 					aos.closeArchiveEntry();
 				}
 
-				if (includeTcNativeWin64 != null) {
+				if (this.includeTcNativeWin64 != null) {
 					aos.putArchiveEntry(new JarArchiveEntry("tcnative-1.dll.64"));
-					Files.copy(Paths.get(includeTcNativeWin64), aos);
+					Files.copy(Paths.get(this.includeTcNativeWin64), aos);
 					aos.closeArchiveEntry();
 				}
 

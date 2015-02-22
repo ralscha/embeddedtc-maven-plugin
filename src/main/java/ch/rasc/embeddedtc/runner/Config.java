@@ -60,7 +60,7 @@ public class Config {
 	private Path myJarDirectory;
 
 	public String getJvmRoute() {
-		return jvmRoute;
+		return this.jvmRoute;
 	}
 
 	public void setJvmRoute(String jvmRoute) {
@@ -68,7 +68,7 @@ public class Config {
 	}
 
 	public boolean isSilent() {
-		return silent;
+		return this.silent;
 	}
 
 	public void setSilent(boolean silent) {
@@ -76,7 +76,7 @@ public class Config {
 	}
 
 	public boolean isUseShutdownHook() {
-		return useShutdownHook;
+		return this.useShutdownHook;
 	}
 
 	public void setUseShutdownHook(boolean useShutdownHook) {
@@ -84,7 +84,7 @@ public class Config {
 	}
 
 	public Set<String> getListeners() {
-		return listeners;
+		return this.listeners;
 	}
 
 	public void setListeners(Set<String> listeners) {
@@ -108,16 +108,16 @@ public class Config {
 	}
 
 	public List<Context> getContexts() {
-		if (context != null) {
-			if (contexts.isEmpty()) {
-				return Collections.singletonList(context);
+		if (this.context != null) {
+			if (this.contexts.isEmpty()) {
+				return Collections.singletonList(this.context);
 			}
 
-			List<Context> combinedContexts = new ArrayList<>(contexts);
-			combinedContexts.add(context);
+			List<Context> combinedContexts = new ArrayList<>(this.contexts);
+			combinedContexts.add(this.context);
 			return combinedContexts;
 		}
-		return contexts;
+		return this.contexts;
 	}
 
 	public void setContexts(List<Context> contexts) {
@@ -129,7 +129,7 @@ public class Config {
 	}
 
 	public Map<String, Object> getSystemProperties() {
-		return systemProperties;
+		return this.systemProperties;
 	}
 
 	public void setSystemProperties(Map<String, Object> systemProperties) {
@@ -137,7 +137,7 @@ public class Config {
 	}
 
 	public String getExtractDirectory() {
-		return extractDirectory;
+		return this.extractDirectory;
 	}
 
 	public void setExtractDirectory(String extractDirectory) {
@@ -145,7 +145,7 @@ public class Config {
 	}
 
 	public Shutdown getShutdown() {
-		return shutdown;
+		return this.shutdown;
 	}
 
 	public void setShutdown(Shutdown shutdown) {
@@ -153,7 +153,7 @@ public class Config {
 	}
 
 	public Path getMyJarDirectory() {
-		return myJarDirectory;
+		return this.myJarDirectory;
 	}
 
 	public void setMyJarDirectory(Path myJarDirectory) {
@@ -169,16 +169,16 @@ public class Config {
 	public List<Connector> createConnectorObjects() throws Exception {
 		List<Connector> conObjects = new ArrayList<>();
 
-		if (connector != null) {
-			if (connectors.isEmpty()) {
-				setConnectors(Collections.singletonList(connector));
+		if (this.connector != null) {
+			if (this.connectors.isEmpty()) {
+				setConnectors(Collections.singletonList(this.connector));
 			}
 			else {
-				connectors.add(connector);
+				this.connectors.add(this.connector);
 			}
 		}
 
-		for (Map<String, Object> con : connectors) {
+		for (Map<String, Object> con : this.connectors) {
 
 			replaceVariables(con);
 
@@ -234,16 +234,16 @@ public class Config {
 	public List<Valve> createValveObjects() {
 		List<Valve> valveObjects = new ArrayList<>();
 
-		if (valve != null) {
-			if (valves.isEmpty()) {
-				setValves(Collections.singletonList(valve));
+		if (this.valve != null) {
+			if (this.valves.isEmpty()) {
+				setValves(Collections.singletonList(this.valve));
 			}
 			else {
-				valves.add(valve);
+				this.valves.add(this.valve);
 			}
 		}
 
-		for (Map<String, Object> v : valves) {
+		for (Map<String, Object> v : this.valves) {
 			String className = (String) v.get(VALVE_CLASSNAME);
 			if (className == null) {
 				Runner.getLogger()
@@ -297,9 +297,10 @@ public class Config {
 
 	@Override
 	public String toString() {
-		return "Config [jvmRoute=" + jvmRoute + ", silent=" + silent + ", listeners="
-				+ listeners + ", systemProperties=" + systemProperties + ", connectors="
-				+ connectors + ", context=" + context + ", contexts=" + contexts + "]";
+		return "Config [jvmRoute=" + this.jvmRoute + ", silent=" + this.silent
+				+ ", listeners=" + this.listeners + ", systemProperties="
+				+ this.systemProperties + ", connectors=" + this.connectors
+				+ ", context=" + this.context + ", contexts=" + this.contexts + "]";
 	}
 
 }
