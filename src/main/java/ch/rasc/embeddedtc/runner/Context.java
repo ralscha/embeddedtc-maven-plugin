@@ -165,8 +165,8 @@ public class Context {
 			ContextResource contextResource = new ContextResource();
 
 			for (Map.Entry<String, Object> entry : res.entrySet()) {
-				IntrospectionUtils.setProperty(contextResource, entry.getKey(), entry
-						.getValue().toString());
+				IntrospectionUtils.setProperty(contextResource, entry.getKey(),
+						entry.getValue().toString());
 			}
 
 			crObjects.add(contextResource);
@@ -177,16 +177,16 @@ public class Context {
 
 	public void decryptPasswords(String password) {
 		if (this.parameter != null) {
-			this.parameter.setValue(ObfuscateUtil.toPlaintext(this.parameter.getValue(),
-					password));
+			this.parameter.setValue(
+					ObfuscateUtil.toPlaintext(this.parameter.getValue(), password));
 		}
 
 		if (this.resource != null) {
 			Map<String, Object> newResource = new HashMap<>();
 			for (Map.Entry<String, Object> entry : this.resource.entrySet()) {
 				if (entry.getValue() instanceof String) {
-					newResource.put(entry.getKey(), ObfuscateUtil.toPlaintext(
-							(String) entry.getValue(), password));
+					newResource.put(entry.getKey(), ObfuscateUtil
+							.toPlaintext((String) entry.getValue(), password));
 				}
 				else {
 					newResource.put(entry.getKey(), entry.getValue());
@@ -196,8 +196,8 @@ public class Context {
 		}
 
 		if (this.environment != null) {
-			this.environment.setValue(ObfuscateUtil.toPlaintext(
-					this.environment.getValue(), password));
+			this.environment.setValue(
+					ObfuscateUtil.toPlaintext(this.environment.getValue(), password));
 		}
 
 		List<Map<String, Object>> newResources = new ArrayList<>();
@@ -205,8 +205,8 @@ public class Context {
 			Map<String, Object> newResource = new HashMap<>();
 			for (Map.Entry<String, Object> entry : res.entrySet()) {
 				if (entry.getValue() instanceof String) {
-					newResource.put(entry.getKey(), ObfuscateUtil.toPlaintext(
-							(String) entry.getValue(), password));
+					newResource.put(entry.getKey(), ObfuscateUtil
+							.toPlaintext((String) entry.getValue(), password));
 				}
 				else {
 					newResource.put(entry.getKey(), entry.getValue());

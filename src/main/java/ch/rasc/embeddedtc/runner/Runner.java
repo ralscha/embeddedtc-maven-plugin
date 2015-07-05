@@ -69,12 +69,12 @@ import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.log.SystemLogHandler;
 import org.yaml.snakeyaml.Yaml;
 
-import ch.rasc.embeddedtc.runner.CheckConfig.CheckConfigOptions;
-import ch.rasc.embeddedtc.runner.ObfuscateUtil.ObfuscateOptions;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+
+import ch.rasc.embeddedtc.runner.CheckConfig.CheckConfigOptions;
+import ch.rasc.embeddedtc.runner.ObfuscateUtil.ObfuscateOptions;
 
 public class Runner {
 
@@ -157,9 +157,9 @@ public class Runner {
 	private static void startTc(StartOptions startOptions) throws URISyntaxException,
 			IOException, Exception, ServletException, LifecycleException {
 
-		final Config config = readConfig(startOptions.configFile != null
-				&& !startOptions.configFile.isEmpty() ? startOptions.configFile.get(0)
-				: null);
+		final Config config = readConfig(
+				startOptions.configFile != null && !startOptions.configFile.isEmpty()
+						? startOptions.configFile.get(0) : null);
 
 		for (Map.Entry<String, Object> entry : config.getSystemProperties().entrySet()) {
 			String value = entry.getValue().toString();
@@ -186,8 +186,8 @@ public class Runner {
 						StandardCharsets.UTF_8);
 
 				String timestamp = null;
-				try (InputStream is = Runner.class.getResourceAsStream("/"
-						+ TIMESTAMP_FILENAME);
+				try (InputStream is = Runner.class
+						.getResourceAsStream("/" + TIMESTAMP_FILENAME);
 						ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
 					copy(is, bos);
@@ -267,8 +267,8 @@ public class Runner {
 			}
 
 			Path timestampFile = extractDir.resolve(TIMESTAMP_FILENAME);
-			try (InputStream is = Runner.class.getResourceAsStream("/"
-					+ TIMESTAMP_FILENAME)) {
+			try (InputStream is = Runner.class
+					.getResourceAsStream("/" + TIMESTAMP_FILENAME)) {
 				Files.copy(is, timestampFile);
 			}
 
@@ -295,8 +295,8 @@ public class Runner {
 
 		Path extraDir = extractDir.resolve(EXTRA_RESOURCES_DIR);
 		if (Files.exists(extraDir)) {
-			System.setProperty("EXTRA_RESOURCES_DIR", extraDir.toAbsolutePath()
-					.toString());
+			System.setProperty("EXTRA_RESOURCES_DIR",
+					extraDir.toAbsolutePath().toString());
 		}
 
 		if (isWin) {
@@ -319,8 +319,8 @@ public class Runner {
 
 		System.setProperty("java.io.tmpdir", tempDir.toAbsolutePath().toString());
 		System.setProperty("log.dir", loggingDir.toAbsolutePath().toString());
-		System.setProperty("java.util.logging.config.file", loggingPropertyFile
-				.toAbsolutePath().toString());
+		System.setProperty("java.util.logging.config.file",
+				loggingPropertyFile.toAbsolutePath().toString());
 		System.setProperty("java.util.logging.manager",
 				"org.apache.juli.ClassLoaderLogManager");
 
@@ -437,9 +437,9 @@ public class Runner {
 
 			if (configuredContext.getEmbeddedWar() != null) {
 				if (configuredContext.getEmbeddedWar().contains("*")) {
-					String regex = ".*?"
-							+ configuredContext.getEmbeddedWar().replace("\\", "\\\\")
-									.replace(".", "\\.").replace("*", ".*?") + "$";
+					String regex = ".*?" + configuredContext.getEmbeddedWar()
+							.replace("\\", "\\\\").replace(".", "\\.").replace("*", ".*?")
+							+ "$";
 					Pattern pattern = Pattern.compile(regex);
 
 					for (String warAbsolutePath : absolutePathsToEmbeddedWars) {
@@ -560,11 +560,11 @@ public class Runner {
 		}
 	}
 
-	private static void stopTc(StopOptions stopOptions) throws URISyntaxException,
-			IOException {
-		Config config = readConfig(stopOptions.configFile != null
-				&& !stopOptions.configFile.isEmpty() ? stopOptions.configFile.get(0)
-				: null);
+	private static void stopTc(StopOptions stopOptions)
+			throws URISyntaxException, IOException {
+		Config config = readConfig(
+				stopOptions.configFile != null && !stopOptions.configFile.isEmpty()
+						? stopOptions.configFile.get(0) : null);
 		if (config.getShutdown() != null && config.getShutdown().getPort() != null) {
 
 			// send shutdown command
@@ -582,8 +582,8 @@ public class Runner {
 		}
 	}
 
-	private static Config readConfig(String pathToConfigFile) throws URISyntaxException,
-			IOException {
+	private static Config readConfig(String pathToConfigFile)
+			throws URISyntaxException, IOException {
 		URL myJarLocationURL = Runner.class.getProtectionDomain().getCodeSource()
 				.getLocation();
 		Path myJar = Paths.get(myJarLocationURL.toURI());

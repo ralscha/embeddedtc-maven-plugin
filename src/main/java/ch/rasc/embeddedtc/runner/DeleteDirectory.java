@@ -49,7 +49,8 @@ public class DeleteDirectory implements FileVisitor<Path> {
 	}
 
 	@Override
-	public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+	public FileVisitResult visitFileFailed(Path file, IOException exc)
+			throws IOException {
 		return FileVisitResult.CONTINUE;
 	}
 }

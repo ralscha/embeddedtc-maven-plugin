@@ -51,26 +51,25 @@ public class ObfuscateUtil {
 		SecretKey key = keyFactory.generateSecret(new PBEKeySpec(password.toCharArray()));
 		Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 		pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(salt, 20));
-		return ENCODE
-				+ DatatypeConverter.printBase64Binary(salt)
-				+ DatatypeConverter.printBase64Binary(pbeCipher.doFinal(plainText
-						.getBytes()));
+		return ENCODE + DatatypeConverter.printBase64Binary(salt) + DatatypeConverter
+				.printBase64Binary(pbeCipher.doFinal(plainText.getBytes()));
 	}
 
 	public static String decrypt(String encryptedText, String password) {
 		try {
 			SecretKeyFactory keyFactory = SecretKeyFactory
 					.getInstance("PBEWithMD5AndDES");
-			SecretKey key = keyFactory.generateSecret(new PBEKeySpec(password
-					.toCharArray()));
+			SecretKey key = keyFactory
+					.generateSecret(new PBEKeySpec(password.toCharArray()));
 			Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 
 			String enc = encryptedText.substring(ENCODE.length() + 12);
-			byte[] salt = DatatypeConverter.parseBase64Binary(encryptedText.substring(
-					ENCODE.length(), ENCODE.length() + 12));
+			byte[] salt = DatatypeConverter.parseBase64Binary(
+					encryptedText.substring(ENCODE.length(), ENCODE.length() + 12));
 
 			pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(salt, 20));
-			return new String(pbeCipher.doFinal(DatatypeConverter.parseBase64Binary(enc)));
+			return new String(
+					pbeCipher.doFinal(DatatypeConverter.parseBase64Binary(enc)));
 		}
 		catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException
 				| NoSuchPaddingException | InvalidAlgorithmParameterException

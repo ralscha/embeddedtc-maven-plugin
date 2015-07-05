@@ -118,10 +118,12 @@ public class PackageTcWarMojo extends AbstractMojo {
 				// If project is a war project add the war to the project
 				if ("war".equalsIgnoreCase(this.project.getPackaging())) {
 					File projectArtifact = this.project.getArtifact().getFile();
-					if (projectArtifact != null && Files.exists(projectArtifact.toPath())) {
-						aos.putArchiveEntry(new JarArchiveEntry(projectArtifact.getName()));
-						try (InputStream is = Files.newInputStream(projectArtifact
-								.toPath())) {
+					if (projectArtifact != null
+							&& Files.exists(projectArtifact.toPath())) {
+						aos.putArchiveEntry(
+								new JarArchiveEntry(projectArtifact.getName()));
+						try (InputStream is = Files
+								.newInputStream(projectArtifact.toPath())) {
 							IOUtils.copy(is, aos);
 						}
 						aos.closeArchiveEntry();
@@ -132,10 +134,11 @@ public class PackageTcWarMojo extends AbstractMojo {
 				if (this.extraWars != null) {
 					for (Dependency extraWarDependency : this.extraWars) {
 						ArtifactRequest request = new ArtifactRequest();
-						request.setArtifact(new DefaultArtifact(extraWarDependency
-								.getGroupId(), extraWarDependency.getArtifactId(),
-								extraWarDependency.getType(), extraWarDependency
-										.getVersion()));
+						request.setArtifact(
+								new DefaultArtifact(extraWarDependency.getGroupId(),
+										extraWarDependency.getArtifactId(),
+										extraWarDependency.getType(),
+										extraWarDependency.getVersion()));
 						request.setRepositories(this.projectRepos);
 						ArtifactResult result;
 						try {
@@ -148,7 +151,8 @@ public class PackageTcWarMojo extends AbstractMojo {
 
 						File extraWarFile = result.getArtifact().getFile();
 						aos.putArchiveEntry(new JarArchiveEntry(extraWarFile.getName()));
-						try (InputStream is = Files.newInputStream(extraWarFile.toPath())) {
+						try (InputStream is = Files
+								.newInputStream(extraWarFile.toPath())) {
 							IOUtils.copy(is, aos);
 						}
 						aos.closeArchiveEntry();
@@ -162,15 +166,13 @@ public class PackageTcWarMojo extends AbstractMojo {
 						DirectoryScanner directoryScanner = new DirectoryScanner();
 						directoryScanner.setBasedir(extraResource.getDirectory());
 
-						directoryScanner.setExcludes(extraResource.getExcludes().toArray(
-								new String[extraResource.getExcludes().size()]));
+						directoryScanner.setExcludes(extraResource.getExcludes()
+								.toArray(new String[extraResource.getExcludes().size()]));
 
 						if (!extraResource.getIncludes().isEmpty()) {
-							directoryScanner
-									.setIncludes(extraResource.getIncludes()
-											.toArray(
-													new String[extraResource
-															.getIncludes().size()]));
+							directoryScanner.setIncludes(extraResource.getIncludes()
+									.toArray(new String[extraResource.getIncludes()
+											.size()]));
 						}
 						else {
 							// include everything by default
@@ -234,7 +236,8 @@ public class PackageTcWarMojo extends AbstractMojo {
 							throw new MojoExecutionException(e.getMessage(), e);
 						}
 
-						try (JarFile jarFile = new JarFile(result.getArtifact().getFile())) {
+						try (JarFile jarFile = new JarFile(
+								result.getArtifact().getFile())) {
 							extractJarToArchive(jarFile, aos);
 						}
 					}
@@ -279,8 +282,8 @@ public class PackageTcWarMojo extends AbstractMojo {
 				for (String rc : runnerClasses) {
 					String classAsPath = rc.replace('.', '/') + ".class";
 
-					try (InputStream is = getClass().getResourceAsStream(
-							"/" + classAsPath)) {
+					try (InputStream is = getClass()
+							.getResourceAsStream("/" + classAsPath)) {
 						aos.putArchiveEntry(new JarArchiveEntry(classAsPath));
 						IOUtils.copy(is, aos);
 						aos.closeArchiveEntry();
@@ -299,8 +302,8 @@ public class PackageTcWarMojo extends AbstractMojo {
 				aos.closeArchiveEntry();
 
 				aos.putArchiveEntry(new JarArchiveEntry(Runner.TIMESTAMP_FILENAME));
-				aos.write(String.valueOf(System.currentTimeMillis()).getBytes(
-						StandardCharsets.UTF_8));
+				aos.write(String.valueOf(System.currentTimeMillis())
+						.getBytes(StandardCharsets.UTF_8));
 				aos.closeArchiveEntry();
 
 			}

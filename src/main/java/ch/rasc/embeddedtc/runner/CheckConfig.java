@@ -34,8 +34,8 @@ public class CheckConfig {
 		try {
 			Path configFile;
 			String pathToConfigFile = checkConfigOptions.configFile != null
-					&& !checkConfigOptions.configFile.isEmpty() ? checkConfigOptions.configFile
-					.get(0) : null;
+					&& !checkConfigOptions.configFile.isEmpty()
+							? checkConfigOptions.configFile.get(0) : null;
 
 			URL url = Runner.class.getProtectionDomain().getCodeSource().getLocation();
 			Path myJar = Paths.get(url.toURI());

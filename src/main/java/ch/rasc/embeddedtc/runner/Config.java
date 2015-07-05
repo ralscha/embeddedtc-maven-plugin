@@ -198,8 +198,8 @@ public class Config {
 
 			for (Map.Entry<String, Object> entry : con.entrySet()) {
 				if (!entry.getKey().equals(CONNECTOR_PROTOCOL)) {
-					IntrospectionUtils.setProperty(tcConnector, entry.getKey(), entry
-							.getValue().toString());
+					IntrospectionUtils.setProperty(tcConnector, entry.getKey(),
+							entry.getValue().toString());
 				}
 			}
 
@@ -266,16 +266,15 @@ public class Config {
 				valveObject = valveClass.newInstance();
 			}
 			catch (InstantiationException | IllegalAccessException e) {
-				Runner.getLogger().warn(
-						"Instantiation of class '" + className + "' failed: "
-								+ e.getMessage());
+				Runner.getLogger().warn("Instantiation of class '" + className
+						+ "' failed: " + e.getMessage());
 				continue;
 			}
 
 			for (Map.Entry<String, Object> entry : v.entrySet()) {
 				if (!entry.getKey().equals(VALVE_CLASSNAME)) {
-					IntrospectionUtils.setProperty(valveObject, entry.getKey(), entry
-							.getValue().toString());
+					IntrospectionUtils.setProperty(valveObject, entry.getKey(),
+							entry.getValue().toString());
 				}
 			}
 
@@ -299,8 +298,8 @@ public class Config {
 	public String toString() {
 		return "Config [jvmRoute=" + this.jvmRoute + ", silent=" + this.silent
 				+ ", listeners=" + this.listeners + ", systemProperties="
-				+ this.systemProperties + ", connectors=" + this.connectors
-				+ ", context=" + this.context + ", contexts=" + this.contexts + "]";
+				+ this.systemProperties + ", connectors=" + this.connectors + ", context="
+				+ this.context + ", contexts=" + this.contexts + "]";
 	}
 
 }
