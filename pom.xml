@@ -228,7 +228,7 @@
 					<properties>
 						<owner>Ralph Schaer</owner>
 						<year>${project.inceptionYear}</year>
-						<currentYear>2014</currentYear>
+						<currentYear>2016</currentYear>
 						<email>ralphschaer@gmail.com</email>
 					</properties>
 					<excludes>
