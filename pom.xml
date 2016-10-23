@@ -48,7 +48,7 @@
 	</scm>
 
 	<properties>
-		<tomcat.version>7.0.68</tomcat.version>
+		<tomcat.version>7.0.72</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.debug>true</maven.compiler.debug>
 	</properties>
@@ -57,19 +57,19 @@
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
-			<version>3.3.3</version>
+			<version>3.3.9</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-archiver</artifactId>
-			<version>3.0.0</version>
+			<version>3.1.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
 			<artifactId>maven-plugin-annotations</artifactId>
-			<version>3.4</version>
+			<version>3.5</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -130,7 +130,7 @@
 		<dependency>
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
-			<version>1.48</version>
+			<version>1.58</version>
 		</dependency>
 
 	</dependencies>
