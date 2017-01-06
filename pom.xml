@@ -76,7 +76,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.12</version>
+			<version>1.13</version>
 		</dependency>
 
 		<dependency>
@@ -228,7 +228,7 @@
 					<properties>
 						<owner>Ralph Schaer</owner>
 						<year>${project.inceptionYear}</year>
-						<currentYear>2016</currentYear>
+						<currentYear>2017</currentYear>
 						<email>ralphschaer@gmail.com</email>
 					</properties>
 					<excludes>
