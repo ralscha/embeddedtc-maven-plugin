@@ -48,7 +48,7 @@
 	</scm>
 
 	<properties>
-		<tomcat.version>7.0.73</tomcat.version>
+		<tomcat.version>7.0.76</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.debug>true</maven.compiler.debug>
 	</properties>
@@ -130,7 +130,7 @@
 		<dependency>
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
-			<version>1.60</version>
+			<version>1.64</version>
 		</dependency>
 
 	</dependencies>
