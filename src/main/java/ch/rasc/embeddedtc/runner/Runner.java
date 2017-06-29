@@ -159,7 +159,8 @@ public class Runner {
 
 		final Config config = readConfig(
 				startOptions.configFile != null && !startOptions.configFile.isEmpty()
-						? startOptions.configFile.get(0) : null);
+						? startOptions.configFile.get(0)
+						: null);
 
 		for (Map.Entry<String, Object> entry : config.getSystemProperties().entrySet()) {
 			String value = entry.getValue().toString();
@@ -564,7 +565,8 @@ public class Runner {
 			throws URISyntaxException, IOException {
 		Config config = readConfig(
 				stopOptions.configFile != null && !stopOptions.configFile.isEmpty()
-						? stopOptions.configFile.get(0) : null);
+						? stopOptions.configFile.get(0)
+						: null);
 		if (config.getShutdown() != null && config.getShutdown().getPort() != null) {
 
 			// send shutdown command
