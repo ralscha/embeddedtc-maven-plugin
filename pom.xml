@@ -136,7 +136,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.6.2</version>
+				<version>3.7.0</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -223,10 +223,10 @@
 				<configuration>
 					<header>${basedir}/src/main/config/header.txt</header>
 					<properties>
-						<owner>Ralph Schaer</owner>
+						
 						<year>${project.inceptionYear}</year>
 						<currentYear>2017</currentYear>
-						<email>ralphschaer@gmail.com</email>
+						
 					</properties>
 					<excludes>
 						<exclude>**/logging.properties</exclude>
